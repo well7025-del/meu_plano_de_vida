@@ -1,0 +1,20 @@
+{
+  "name": "@vagas/api",
+  "version": "0.1.0",
+  "description": "Servico de ingestao de eventos e consulta de vagas.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning --import tsx src/server.ts",
+    "test": "node --no-warnings=ExperimentalWarning --import tsx --test test/*.test.ts",
+    "pretest": "npm run build -w @vagas/core",
+    "prestart": "npm run build -w @vagas/core"
+  },
+  "dependencies": {
+    "@vagas/core": "0.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

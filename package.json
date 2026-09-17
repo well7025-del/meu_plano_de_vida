@@ -1,0 +1,24 @@
+{
+  "name": "vagas",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Vagas — sinalizador colaborativo de vagas de estacionamento na rua, com deteccao automatica por perfil de movimento.",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @vagas/core",
+    "test": "npm run test -w @vagas/core && npm run test -w @vagas/api",
+    "simulate": "npm run simulate -w @vagas/core",
+    "api": "npm start -w @vagas/api"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}

@@ -1,0 +1,90 @@
+# Vagas
+
+Sinalizador colaborativo de vagas de estacionamento na rua.
+
+O app percebe sozinho, pelo perfil de movimento do celular, quando um carro
+**sai** de uma vaga e quando um carro **ocupa** uma vaga — e transforma isso em
+pontos verdes no mapa de quem está procurando lugar para estacionar.
+
+```
+  caminhada  →  carro em movimento         =  vaga LIBERADA  (ponto verde)
+  carro      →  parado  →  caminhada       =  vaga OCUPADA   (apaga o ponto)
+```
+
+Ninguém precisa apertar nada. É esse o ponto: todo app colaborativo de vaga que
+depende do usuário avisar morre por falta de aviso.
+
+## Estado deste repositório
+
+| Parte | O que é | Situação |
+|---|---|---|
+| `packages/core` | Motor de detecção + modelo de probabilidade, TypeScript puro | **Funciona, 34 testes** |
+| `services/api` | Ingestão de eventos e consulta de pontos | **Funciona, 15 testes** |
+| `apps/mobile` | App Expo / React Native (mapa, detecção em background) | Código completo, precisa de build nativo |
+| `apps/web-demo` | Simulador visual do sistema inteiro rodando | Abre no navegador |
+| `docs/` | Algoritmo, arquitetura, privacidade e roadmap de produto | — |
+
+## Rodando
+
+```bash
+npm install
+npm test          # 49 testes: motor + API
+npm run simulate  # simulação de campo com 60 motoristas e medição de acerto
+npm run api       # sobe a API em http://localhost:8787
+```
+
+O simulador gera trajetos sintéticos de GPS com ruído, sabe onde cada carro
+realmente estacionou e compara com o que o motor detectou:
+
+```
+=== Vagas — simulacao de campo ===
+motoristas simulados......... 60
+eventos reais (verdade)...... 120
+eventos detectados........... 120
+cobertura (recall)........... 100.0%
+precisao..................... 100.0%
+erro do ponto: mediana....... 20.4 m
+trajetos so de passagem...... 20 percursos, 0 eventos gerados
+```
+
+Esses números são de trajetos **sintéticos**: eles provam que a lógica está
+correta e que semáforo/trânsito não viram falso positivo, não que o app acerta
+isso na rua. O que a rua vai quebrar está listado em
+[`docs/ALGORITMO.md`](docs/ALGORITMO.md#o-que-a-rua-quebra).
+
+O app mobile mora fora do workspace (depende do toolchain nativo do Expo):
+
+```bash
+cd apps/mobile && npm install && npx expo run:android
+```
+
+## Como funciona, em uma tela
+
+```
+  ┌─ celular ────────────────────────────────┐      ┌─ servidor ──────────┐
+  │  GPS + sensor de movimento               │      │                     │
+  │        ↓                                 │      │  eventos anônimos   │
+  │  classificador de modo (mediana +        │      │  agrupados em       │
+  │  histerese: parado / a pé / veículo)     │      │  células de 40 m    │
+  │        ↓                                 │      │        ↓            │
+  │  máquina de estados → evento             │─────▶│  λ = Σ saídas −     │
+  │  (ponto, horário, confiança)             │ só o │      Σ chegadas,    │
+  │        ↓                                 │ evento  com decaimento    │
+  │  fila local, envio em lote com atraso    │      │        ↓            │
+  └──────────────────────────────────────────┘      │  P = 1 − e^−λ       │
+                                                    └─────────────────────┘
+```
+
+A trajetória nunca sai do aparelho. O servidor recebe pontos soltos, sem conta,
+sem identificador, com retenção de 1 hora — ele é um agregador burro de
+propósito. Detalhes em [`docs/PRIVACIDADE.md`](docs/PRIVACIDADE.md).
+
+## Documentação
+
+- [`docs/ALGORITMO.md`](docs/ALGORITMO.md) — como a detecção funciona, os
+  limiares, e cada falso positivo que ela precisa derrubar
+- [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) — componentes, escala, custo,
+  e o problema de partida a frio
+- [`docs/PRIVACIDADE.md`](docs/PRIVACIDADE.md) — o que sai do celular e por quê
+- [`docs/PRODUTO.md`](docs/PRODUTO.md) — o roadmap: o que eu acrescentaria
+  além do mapa de pontinhos verdes, e em que ordem

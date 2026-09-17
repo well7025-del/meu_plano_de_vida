@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Vagas",
+    "slug": "vagas",
+    "scheme": "vagas",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.vagas.mobile",
+      "infoPlist": {
+        "UIBackgroundModes": ["location", "fetch"],
+        "NSLocationWhenInUseUsageDescription": "O Vagas usa sua localizacao para mostrar vagas provaveis perto de voce.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Com a localizacao em segundo plano, o Vagas percebe sozinho quando voce sai de uma vaga e avisa outro motorista. Nenhum trajeto sai do seu celular: so o ponto da vaga, sem identificacao.",
+        "NSMotionUsageDescription": "O sensor de movimento distingue caminhada de carro, o que deixa a deteccao mais precisa e gasta menos bateria que o GPS sozinho."
+      }
+    },
+    "android": {
+      "package": "app.vagas.mobile",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "ACTIVITY_RECOGNITION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": { "apiKey": "SUA_CHAVE_AQUI" }
+      }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "isAndroidBackgroundLocationEnabled": true,
+          "isIosBackgroundLocationEnabled": true,
+          "locationAlwaysAndWhenInUsePermission": "O Vagas so precisa disso para detectar quando uma vaga e liberada."
+        }
+      ]
+    ]
+  }
+}
