@@ -1,0 +1,1052 @@
+<title>Vagas ao Vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #e7ebe8;
+    --surface: #f8faf8;
+    --surface-2: #eef2ef;
+    --ink: #15211c;
+    --muted: #5c6b64;
+    --line: #ccd6d0;
+    --asphalt: #c8d1cb;
+    --asphalt-line: #dbe2dd;
+    --free: #1f9d4d;
+    --free-soft: rgba(31, 157, 77, 0.22);
+    --medium: #c07908;
+    --medium-soft: rgba(192, 121, 8, 0.2);
+    --car: #2f7fae;
+    --walker: #7a5ea8;
+    --busy: #b23c33;
+    --shadow: 0 1px 2px rgba(20, 40, 32, 0.08), 0 8px 24px rgba(20, 40, 32, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c1311;
+      --surface: #121b18;
+      --surface-2: #17211d;
+      --ink: #e4ede8;
+      --muted: #8ea099;
+      --line: #223029;
+      --asphalt: #1b2622;
+      --asphalt-line: #253129;
+      --free: #40d878;
+      --free-soft: rgba(64, 216, 120, 0.2);
+      --medium: #eba93c;
+      --medium-soft: rgba(235, 169, 60, 0.18);
+      --car: #5fb6e6;
+      --walker: #b39ae0;
+      --busy: #e2685e;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c1311;
+    --surface: #121b18;
+    --surface-2: #17211d;
+    --ink: #e4ede8;
+    --muted: #8ea099;
+    --line: #223029;
+    --asphalt: #1b2622;
+    --asphalt-line: #253129;
+    --free: #40d878;
+    --free-soft: rgba(64, 216, 120, 0.2);
+    --medium: #eba93c;
+    --medium-soft: rgba(235, 169, 60, 0.18);
+    --car: #5fb6e6;
+    --walker: #b39ae0;
+    --busy: #e2685e;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.3);
+  }
+
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    padding-block: 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  header { display: flex; flex-direction: column; gap: 6px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(26px, 4.6vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .lede { margin: 0; max-width: 62ch; color: var(--muted); font-size: 15px; }
+  .lede b { color: var(--ink); font-weight: 600; }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .ctl { display: flex; align-items: center; gap: 8px; }
+  .ctl label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  button {
+    font: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: var(--free); border-color: var(--free); color: #04140a; }
+  button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--car);
+    outline-offset: 2px;
+  }
+  select {
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+  input[type="range"] { width: 108px; accent-color: var(--free); }
+  .val {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    min-width: 3.4em;
+  }
+
+  .stage { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; }
+  @media (max-width: 920px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+
+  .mapcard {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  canvas#map { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; max-width: 100%; }
+  .clock {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--surface) 86%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 4px 9px;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    background: var(--surface-2);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .key { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .swatch.sq { border-radius: 2px; width: 12px; height: 7px; }
+
+  .rail { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .panel h2 {
+    margin: 0 0 10px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tile { display: flex; flex-direction: column; gap: 2px; }
+  .tile .n {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 23px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .tile .l { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+  .tile .n.good { color: var(--free); }
+
+  .fsm { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+  .fsm .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--muted);
+    border: 1px solid transparent;
+  }
+  .fsm .step.on {
+    color: var(--ink);
+    background: var(--surface-2);
+    border-color: var(--line);
+    font-weight: 600;
+  }
+  .fsm .step .pip {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--line); flex: none;
+  }
+  .fsm .step.on .pip { background: var(--car); }
+  canvas#trace { display: block; width: 100%; height: 76px; }
+  .tracelabel {
+    display: flex;
+    justify-content: space-between;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  ul.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  ul.log li {
+    display: grid;
+    grid-template-columns: 8px 1fr auto;
+    align-items: baseline;
+    gap: 9px;
+    font-size: 13px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid var(--line);
+  }
+  ul.log li:last-child { border-bottom: 0; padding-bottom: 0; }
+  ul.log .bar { width: 4px; height: 100%; min-height: 15px; border-radius: 2px; align-self: stretch; }
+  ul.log .when {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .empty { color: var(--muted); font-size: 13px; font-style: italic; }
+
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--free);
+    border-radius: 0 12px 12px 0;
+    padding: 13px 15px;
+  }
+  .note h3 { margin: 0 0 5px; font-size: 14.5px; font-weight: 600; }
+  .note p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+  .note.warn { border-left-color: var(--medium); }
+  .note.info { border-left-color: var(--car); }
+
+  footer {
+    color: var(--muted);
+    font-size: 12.5px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.92em;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Simulação · detecção por perfil de movimento</div>
+    <h1>Vagas ao Vivo</h1>
+    <p class="lede">
+      Um bairro de 720 m com 1176 vagas de meio-fio. Os carros chegam, estacionam
+      e vão embora; parte dos motoristas leva o app no bolso. Ninguém aperta nada:
+      o app deduz a vaga do <b>perfil de velocidade</b> — caminhada, depois carro,
+      significa que uma vaga acabou de abrir.
+    </p>
+  </header>
+
+  <div class="controls">
+    <div class="ctl">
+      <button id="play" class="primary" type="button">Pausar</button>
+      <button id="reset" type="button">Reiniciar</button>
+    </div>
+    <div class="ctl">
+      <label for="speed">Velocidade</label>
+      <select id="speed">
+        <option value="0.5">lenta</option>
+        <option value="1" selected>normal</option>
+        <option value="4">rápida</option>
+      </select>
+    </div>
+    <div class="ctl">
+      <label for="coverage">Motoristas com o app</label>
+      <input type="range" id="coverage" min="5" max="100" step="5" value="40">
+      <span class="val" id="coverageVal">40%</span>
+    </div>
+    <div class="ctl">
+      <label for="truth">Mostrar vagas reais</label>
+      <input type="checkbox" id="truth">
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="mapcard">
+      <canvas id="map" width="900" height="900" aria-label="Mapa do bairro simulado com pontos de vaga provável"></canvas>
+      <div class="clock" id="clock">08:00</div>
+      <div class="legend">
+        <span class="key"><span class="swatch" style="background:var(--free)"></span> vaga provável (alta)</span>
+        <span class="key"><span class="swatch" style="background:var(--medium)"></span> média</span>
+        <span class="key"><span class="swatch sq" style="background:var(--car)"></span> carro com o app</span>
+        <span class="key"><span class="swatch sq" style="background:var(--muted)"></span> carro sem o app</span>
+        <span class="key"><span class="swatch" style="background:var(--walker)"></span> a pé</span>
+      </div>
+    </div>
+
+    <div class="rail">
+      <div class="panel">
+        <h2>Agora no bairro</h2>
+        <div class="tiles">
+          <div class="tile"><span class="n" id="mFree">—</span><span class="l">vagas livres de verdade</span></div>
+          <div class="tile"><span class="n good" id="mDots">—</span><span class="l">pontos no mapa</span></div>
+          <div class="tile"><span class="n" id="mHit">—</span><span class="l">pontos com vaga real a menos de 40 m</span></div>
+          <div class="tile"><span class="n" id="mEvents">—</span><span class="l">eventos detectados</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Motorista em observação</h2>
+        <div class="fsm" id="fsm">
+          <div class="step" data-s="walking"><span class="pip"></span> caminhando</div>
+          <div class="step" data-s="in_vehicle"><span class="pip"></span> dirigindo</div>
+          <div class="step" data-s="vehicle_stopped"><span class="pip"></span> parado no carro</div>
+          <div class="step" data-s="unknown"><span class="pip"></span> indefinido</div>
+        </div>
+        <canvas id="trace" width="600" height="152" aria-label="Velocidade do motorista observado nos últimos minutos"></canvas>
+        <div class="tracelabel"><span>3 min atrás</span><span id="spdNow">0,0 m/s</span><span>agora</span></div>
+      </div>
+
+      <div class="panel">
+        <h2>Últimas detecções</h2>
+        <ul class="log" id="log"><li class="empty">aguardando…</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note">
+      <h3>Por que o ponto é um círculo</h3>
+      <p>
+        O GPS erra, e o carro já andou uma quadra quando o app tem certeza de que
+        é carro. O motor volta no tempo para ancorar o evento, mas o resto da
+        incerteza fica visível: o círculo cresce conforme a informação envelhece.
+      </p>
+    </div>
+    <div class="note warn">
+      <h3>Baixe a cobertura para 10%</h3>
+      <p>
+        O mapa esvazia e o pouco que sobra erra mais: as vagas continuam abrindo,
+        só que ninguém está lá para ver. É o problema de partida a frio, e é ele
+        que decide se o app existe — não o algoritmo.
+      </p>
+    </div>
+    <div class="note info">
+      <h3>Ligue “mostrar vagas reais”</h3>
+      <p>
+        Os pontos cinzas são todas as vagas livres do bairro. A distância entre
+        eles e os pontos verdes é exatamente o que o app ainda não sabe.
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    Simulação com os mesmos limiares do motor real (<code>packages/core</code>):
+    caminhada 0,7–2,8 m/s · veículo acima de 4,2 m/s · parada mínima de 90 s ·
+    deslocamento mínimo de 200 m para confirmar uma saída · meia-vida da
+    informação de 12 minutos. Trajetos e ruído de GPS são sintéticos.
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------------------------------------------------------------- mundo
+  const BLOCK = 120;           // metros entre ruas
+  const N = 6;                 // quadras por lado
+  const SIZE = BLOCK * N;      // 720 m
+  const SPOT_GAP = 15;         // espaçamento das vagas no meio-fio
+  const CURB = 5;              // recuo da vaga em relação ao eixo da rua
+  const DRIVERS = 60;
+  const OCCUPANCY = 0.92;   // rua disputada: e assim que o problema se parece
+
+  const lines = Array.from({ length: N + 1 }, (_, i) => i * BLOCK);
+
+  /** Vagas de meio-fio nos dois lados de cada trecho de rua. */
+  function buildSpots() {
+    const spots = [];
+    const push = (x, y) => spots.push({ x, y, car: null });
+    for (const y of lines) {
+      for (let x = SPOT_GAP; x < SIZE; x += SPOT_GAP) {
+        if (Math.abs(x % BLOCK) < SPOT_GAP || Math.abs(x % BLOCK) > BLOCK - SPOT_GAP) continue;
+        push(x, y - CURB); push(x, y + CURB);
+      }
+    }
+    for (const x of lines) {
+      for (let y = SPOT_GAP; y < SIZE; y += SPOT_GAP) {
+        if (Math.abs(y % BLOCK) < SPOT_GAP || Math.abs(y % BLOCK) > BLOCK - SPOT_GAP) continue;
+        push(x - CURB, y); push(x + CURB, y);
+      }
+    }
+    return spots;
+  }
+
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+
+  /** Rota em L pelo grid: sobe até a rua mais próxima, anda, depois desce. */
+  function route(from, to) {
+    const snapX = lines.reduce((p, c) => (Math.abs(c - from.x) < Math.abs(p - from.x) ? c : p));
+    const snapY = lines.reduce((p, c) => (Math.abs(c - from.y) < Math.abs(p - from.y) ? c : p));
+    const tgtX = lines.reduce((p, c) => (Math.abs(c - to.x) < Math.abs(p - to.x) ? c : p));
+    const tgtY = lines.reduce((p, c) => (Math.abs(c - to.y) < Math.abs(p - to.y) ? c : p));
+    const horizontalFirst = Math.abs(from.y - snapY) < Math.abs(from.x - snapX);
+    const pts = [];
+    if (horizontalFirst) {
+      pts.push({ x: from.x, y: snapY }, { x: tgtX, y: snapY }, { x: tgtX, y: tgtY });
+    } else {
+      pts.push({ x: snapX, y: from.y }, { x: snapX, y: tgtY }, { x: tgtX, y: tgtY });
+    }
+    pts.push({ x: to.x, y: to.y });
+    return pts;
+  }
+
+  // ------------------------------------------------- motor (espelha o core)
+  const CFG = {
+    stillMax: 0.7, walkMax: 2.8, vehicleMin: 4.2,
+    dwellStill: 20, dwellWalk: 12, dwellVehicle: 15,
+    minWalkS: 25, minVehicleS: 45, minStopS: 90,
+    minDriveM: 200, minWalkAwayM: 40, minConfidence: 0.45,
+    medianWindow: 5,
+  };
+
+  function median(a) {
+    if (!a.length) return 0;
+    const s = [...a].sort((x, y) => x - y);
+    const m = s.length >> 1;
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+
+  /** Classificador + máquina de estados, na mesma estrutura de packages/core. */
+  class Detector {
+    constructor() {
+      this.speeds = [];
+      this.mode = 'unknown'; this.modeSince = 0;
+      this.cand = 'unknown'; this.candSince = 0;
+      this.state = 'unknown';
+      this.seg = null; this.lastWalk = null; this.lastDrive = null;
+      this.pendDep = null; this.pendArr = null; this.stopAt = null;
+      this.recent = []; this.ownArrival = null;
+      this.speedTrace = [];
+    }
+    dwell(m) {
+      return m === 'still' ? CFG.dwellStill : m === 'walking' ? CFG.dwellWalk : CFG.dwellVehicle;
+    }
+    push(s) {
+      this.speeds.push(s.v);
+      if (this.speeds.length > CFG.medianWindow) this.speeds.shift();
+      const v = median(this.speeds);
+      this.speedTrace.push(v);
+      if (this.speedTrace.length > 180) this.speedTrace.shift();
+      this.recent.push(s);
+      if (this.recent.length > 600) this.recent.shift();
+
+      let inst = 'unknown';
+      if (v < CFG.stillMax) inst = 'still';
+      else if (v < CFG.walkMax) inst = 'walking';
+      else if (v >= CFG.vehicleMin) inst = 'vehicle';
+
+      let changed = false;
+      if (inst !== 'unknown') {
+        if (inst !== this.cand) { this.cand = inst; this.candSince = s.t; }
+        if (this.cand !== this.mode && s.t - this.candSince >= this.dwell(this.cand)) {
+          this.mode = this.cand; this.modeSince = this.candSince; changed = true;
+        }
+      }
+
+      this.track(s);
+      const out = [];
+      if (changed) this.onChange(s);
+      this.confirm(s, out);
+      return out;
+    }
+    track(s) {
+      if (!this.seg || this.seg.mode !== this.mode) {
+        if (this.seg) {
+          if (this.seg.mode === 'walking') this.lastWalk = this.seg;
+          if (this.seg.mode === 'vehicle') this.lastDrive = this.seg;
+        }
+        this.seg = { mode: this.mode, t0: this.modeSince, t1: s.t, x: s.x, y: s.y, lx: s.x, ly: s.y, d: 0 };
+        return;
+      }
+      this.seg.d += Math.hypot(s.x - this.seg.lx, s.y - this.seg.ly);
+      this.seg.lx = s.x; this.seg.ly = s.y; this.seg.t1 = s.t;
+    }
+    at(t) {
+      let best = null, bd = Infinity;
+      for (const r of this.recent) { const d = Math.abs(r.t - t); if (d < bd) { bd = d; best = r; } }
+      return best;
+    }
+    dur(seg) { return seg ? Math.max(0, seg.t1 - seg.t0) : 0; }
+    onChange(s) {
+      if (this.mode === 'vehicle') {
+        if (this.state === 'vehicle_stopped') { this.stopAt = null; this.pendArr = null; }
+        else {
+          const w = this.lastWalk, ws = this.dur(w);
+          if (this.state === 'walking' && w && s.t - w.t1 <= 600 && ws >= CFG.minWalkS) {
+            const a = this.at(this.modeSince) || s;
+            this.pendDep = { x: a.x, y: a.y, t: this.modeSince, walkS: ws };
+          }
+        }
+        this.state = 'in_vehicle';
+      } else if (this.mode === 'still') {
+        if (this.state === 'in_vehicle') { this.stopAt = this.modeSince; this.state = 'vehicle_stopped'; }
+      } else if (this.mode === 'walking') {
+        if (this.state === 'vehicle_stopped' && this.stopAt !== null) {
+          const stopS = this.modeSince - this.stopAt;
+          if (stopS >= CFG.minStopS) {
+            const a = this.at(this.stopAt) || s;
+            this.pendArr = { x: a.x, y: a.y, t: this.stopAt, driveM: this.lastDrive ? this.lastDrive.d : 0, stopS };
+          }
+          this.stopAt = null;
+        } else if (this.state === 'in_vehicle' && this.pendDep) {
+          const d = this.seg && this.seg.mode === 'vehicle' ? this.seg : this.lastDrive;
+          if (!d || d.d < CFG.minDriveM) this.pendDep = null;
+        }
+        this.state = 'walking';
+      }
+    }
+    confirm(s, out) {
+      if (this.pendDep && this.seg && this.seg.mode === 'vehicle') {
+        if (this.dur(this.seg) >= CFG.minVehicleS && this.seg.d >= CFG.minDriveM) {
+          const p = this.pendDep;
+          out.push(this.make('departure', p, { walkS: p.walkS, driveM: this.seg.d, stopS: 0 }, s.t));
+          this.pendDep = null;
+        }
+      }
+      if (this.pendArr && this.seg && this.seg.mode === 'walking') {
+        const away = Math.hypot(s.x - this.pendArr.x, s.y - this.pendArr.y);
+        if (away >= CFG.minWalkAwayM && this.dur(this.seg) >= CFG.minWalkS) {
+          const p = this.pendArr;
+          const e = this.make('arrival', p, { walkS: this.dur(this.seg), driveM: p.driveM, stopS: p.stopS }, s.t);
+          this.pendArr = null;
+          if (e) this.ownArrival = { x: e.x, y: e.y };
+          out.push(e);
+        }
+      }
+      // eventos abaixo do corte de confiança viram null e são filtrados
+      for (let i = out.length - 1; i >= 0; i--) if (!out[i]) out.splice(i, 1);
+    }
+    make(kind, p, sig, now) {
+      const walkF = clamp01(sig.walkS / (2 * CFG.minWalkS));
+      const driveF = clamp01(sig.driveM / (3 * CFG.minDriveM));
+      const accF = 0.8;
+      const stopF = kind === 'arrival' ? clamp01(sig.stopS / (3 * CFG.minStopS)) : 1;
+      let c = clamp01(0.25 + 0.2 * walkF + 0.2 * driveF + 0.2 * accF + 0.15 * stopF);
+      if (kind === 'departure' && this.ownArrival && Math.hypot(p.x - this.ownArrival.x, p.y - this.ownArrival.y) <= 60) {
+        c = clamp01(c + 0.2);
+      }
+      if (c < CFG.minConfidence) return null;
+      return { kind, x: p.x, y: p.y, t: p.t, confirmedAt: now, confidence: c };
+    }
+  }
+
+  // -------------------------------------------- mapa de probabilidade
+  const HALF_LIFE = 12 * 60;
+  const MAX_AGE = 60 * 60;
+  const CELL = 40;
+  const MIN_P = 0.15;
+
+  class SpotMap {
+    constructor() { this.cells = new Map(); }
+    add(e) {
+      const key = `${Math.floor(e.x / CELL)}:${Math.floor(e.y / CELL)}`;
+      const list = this.cells.get(key) || [];
+      list.push(e);
+      this.cells.set(key, list);
+    }
+    dots(now) {
+      const out = [];
+      for (const [key, list] of this.cells) {
+        const fresh = list.filter((e) => now - e.t <= MAX_AGE);
+        if (!fresh.length) { this.cells.delete(key); continue; }
+        this.cells.set(key, fresh);
+        let lambda = 0, wx = 0, wy = 0, ws = 0, last = 0;
+        for (const e of fresh) {
+          const w = e.confidence * Math.pow(0.5, (now - e.t) / HALF_LIFE);
+          lambda += e.kind === 'departure' ? w : -w;
+          if (e.kind === 'departure') { wx += e.x * w; wy += e.y * w; ws += w; }
+          last = Math.max(last, e.t);
+        }
+        lambda = Math.max(0, lambda);
+        const p = 1 - Math.exp(-lambda);
+        if (p < MIN_P || ws === 0) continue;
+        out.push({ x: wx / ws, y: wy / ws, p, last, tier: p >= 0.55 ? 'alta' : p >= 0.25 ? 'media' : 'baixa' });
+      }
+      return out;
+    }
+  }
+
+  // ------------------------------------------------------------ motoristas
+  // Ciclo: fora do carro → volta a pé → dirige → estaciona → sai a pé.
+  class Driver {
+    constructor(id, spots, hasApp) {
+      this.id = id;
+      this.hasApp = hasApp;
+      this.detector = hasApp ? new Detector() : null;
+      this.spot = null;
+      this.phase = 'away';
+      this.until = 0;
+      this.path = [];
+      this.speed = 0;
+      this.x = 0; this.y = 0;
+      this.spots = spots;
+    }
+    seed(now) {
+      const free = this.spots.filter((s) => !s.car);
+      this.spot = pick(free);
+      this.spot.car = this;
+      const away = rnd(60, 220);
+      const ang = Math.random() * Math.PI * 2;
+      this.x = Math.max(10, Math.min(SIZE - 10, this.spot.x + Math.cos(ang) * away));
+      this.y = Math.max(10, Math.min(SIZE - 10, this.spot.y + Math.sin(ang) * away));
+      this.phase = 'away';
+      this.until = now + rnd(60, 900);
+    }
+    step(now, dt) {
+      switch (this.phase) {
+        case 'away':
+          this.speed = 0;
+          if (now >= this.until) { this.path = route(this, this.spot); this.phase = 'walk_to_car'; }
+          break;
+        case 'walk_to_car':
+          this.move(1.35, dt);
+          if (!this.path.length) { this.phase = 'board'; this.until = now + rnd(15, 45); this.speed = 0; }
+          break;
+        case 'board':
+          this.speed = 0;
+          if (now >= this.until) {
+            this.spot.car = null;
+            const free = this.spots.filter((s) => !s.car && dist(s, this) > 260);
+            this.target = free.length ? pick(free) : pick(this.spots.filter((s) => !s.car));
+            if (!this.target) { this.phase = 'away'; this.until = now + 60; break; }
+            this.target.car = this;   // reserva: duas pessoas nao param na mesma vaga
+            this.path = route(this, this.target);
+            this.phase = 'drive';
+          }
+          break;
+        case 'drive':
+          this.move(rnd(7.5, 10.5), dt);
+          if (!this.path.length) {
+            this.spot = this.target;
+            this.x = this.spot.x; this.y = this.spot.y;
+            this.phase = 'parked';
+            this.until = now + rnd(100, 240);
+            this.speed = 0;
+          }
+          break;
+        case 'parked':
+          this.speed = 0;
+          if (now >= this.until) {
+            const ang = Math.random() * Math.PI * 2;
+            const d = rnd(90, 260);
+            this.dest = {
+              x: Math.max(10, Math.min(SIZE - 10, this.x + Math.cos(ang) * d)),
+              y: Math.max(10, Math.min(SIZE - 10, this.y + Math.sin(ang) * d)),
+            };
+            this.path = route(this, this.dest);
+            this.phase = 'walk_away';
+          }
+          break;
+        case 'walk_away':
+          this.move(1.35, dt);
+          if (!this.path.length) { this.phase = 'away'; this.until = now + rnd(240, 1500); this.speed = 0; }
+          break;
+      }
+    }
+    move(v, dt) {
+      let budget = v * dt;
+      this.speed = v;
+      while (budget > 0 && this.path.length) {
+        const p = this.path[0];
+        const d = Math.hypot(p.x - this.x, p.y - this.y);
+        if (d <= budget) {
+          this.x = p.x; this.y = p.y; budget -= d; this.path.shift();
+        } else {
+          this.x += ((p.x - this.x) / d) * budget;
+          this.y += ((p.y - this.y) / d) * budget;
+          budget = 0;
+        }
+      }
+    }
+    get moving() { return this.phase === 'drive'; }
+    get onFoot() { return this.phase === 'walk_to_car' || this.phase === 'walk_away'; }
+  }
+
+  // -------------------------------------------------------------- simulação
+  const state = {
+    spots: [], drivers: [], map: new SpotMap(), t: 8 * 3600,
+    events: 0, log: [], playing: true, speed: 1, coverage: 0.4,
+    showTruth: false, watched: null,
+  };
+
+  function reset() {
+    state.spots = buildSpots();
+    state.map = new SpotMap();
+    state.t = 8 * 3600;
+    state.events = 0;
+    state.log = [];
+    state.drivers = [];
+
+    // Carros que nao se mexem durante a simulacao: definem a escassez.
+    const parked = Math.round(state.spots.length * OCCUPANCY) - DRIVERS;
+    const pool = [...state.spots].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < parked && i < pool.length; i++) pool[i].car = 'estatico';
+    for (let i = 0; i < DRIVERS; i++) {
+      const d = new Driver(i, state.spots, Math.random() < state.coverage);
+      d.seed(state.t);
+      state.drivers.push(d);
+    }
+    state.watched = state.drivers.find((d) => d.hasApp) || null;
+    for (let i = 0; i < 1500; i++) tick(1);   // aquece: o mapa abre povoado
+  }
+
+  function tick(dt) {
+    state.t += dt;
+    for (const d of state.drivers) {
+      d.step(state.t, dt);
+      if (!d.detector) continue;
+      // Amostra de GPS com ruído, 1 Hz.
+      const noise = 3.5;
+      const sample = {
+        t: state.t,
+        x: d.x + (Math.random() - 0.5) * noise * 2,
+        y: d.y + (Math.random() - 0.5) * noise * 2,
+        v: Math.max(0, d.speed + (Math.random() - 0.5) * 0.5),
+      };
+      for (const e of d.detector.push(sample)) {
+        state.map.add(e);
+        state.events++;
+        state.log.unshift({ kind: e.kind, t: e.t, conf: e.confidence });
+        if (state.log.length > 6) state.log.pop();
+      }
+    }
+  }
+
+  // ------------------------------------------------------------- desenho
+  const cv = document.getElementById('map');
+  const ctx = cv.getContext('2d');
+  const trace = document.getElementById('trace');
+  const tctx = trace.getContext('2d');
+  let css = {};
+
+  function readTokens() {
+    const s = getComputedStyle(document.documentElement);
+    css = {
+      surface: s.getPropertyValue('--surface').trim(),
+      asphalt: s.getPropertyValue('--asphalt').trim(),
+      asphaltLine: s.getPropertyValue('--asphalt-line').trim(),
+      free: s.getPropertyValue('--free').trim(),
+      freeSoft: s.getPropertyValue('--free-soft').trim(),
+      medium: s.getPropertyValue('--medium').trim(),
+      mediumSoft: s.getPropertyValue('--medium-soft').trim(),
+      car: s.getPropertyValue('--car').trim(),
+      walker: s.getPropertyValue('--walker').trim(),
+      muted: s.getPropertyValue('--muted').trim(),
+      line: s.getPropertyValue('--line').trim(),
+      ink: s.getPropertyValue('--ink').trim(),
+    };
+  }
+
+  function fit(canvas, context) {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width) return 0;
+    const w = Math.round(rect.width * dpr);
+    const h = Math.round(rect.height * dpr);
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return rect.width;
+  }
+
+  function draw() {
+    const w = fit(cv, ctx);
+    if (!w) return;
+    const k = w / SIZE;
+    ctx.fillStyle = css.surface;
+    ctx.fillRect(0, 0, w, w);
+
+    // ruas
+    ctx.strokeStyle = css.asphalt;
+    ctx.lineWidth = 15 * k;
+    ctx.lineCap = 'round';
+    for (const v of lines) {
+      ctx.beginPath(); ctx.moveTo(0, v * k); ctx.lineTo(w, v * k); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(v * k, 0); ctx.lineTo(v * k, w); ctx.stroke();
+    }
+    ctx.strokeStyle = css.asphaltLine;
+    ctx.lineWidth = Math.max(0.6, 1 * k);
+    for (const v of lines) {
+      ctx.beginPath(); ctx.moveTo(0, v * k); ctx.lineTo(w, v * k); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(v * k, 0); ctx.lineTo(v * k, w); ctx.stroke();
+    }
+
+    // verdade opcional: todas as vagas realmente livres
+    if (state.showTruth) {
+      ctx.fillStyle = css.muted;
+      ctx.globalAlpha = 0.5;
+      for (const s of state.spots) {
+        if (s.car) continue;
+        ctx.beginPath();
+        ctx.arc(s.x * k, s.y * k, Math.max(1, 1.6 * k), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // pontos do app
+    const dots = state.map.dots(state.t);
+    for (const d of dots) {
+      const high = d.tier === 'alta';
+      const r = (26 + (1 - d.p) * 34) * k;
+      ctx.fillStyle = high ? css.freeSoft : css.mediumSoft;
+      ctx.beginPath(); ctx.arc(d.x * k, d.y * k, r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = high ? css.free : css.medium;
+      ctx.lineWidth = Math.max(1, 1.4 * k);
+      ctx.stroke();
+      ctx.fillStyle = high ? css.free : css.medium;
+      ctx.beginPath(); ctx.arc(d.x * k, d.y * k, Math.max(2.5, 3.6 * k), 0, Math.PI * 2); ctx.fill();
+    }
+
+    // agentes
+    for (const d of state.drivers) {
+      const px = d.x * k, py = d.y * k;
+      if (d.moving) {
+        ctx.fillStyle = d.hasApp ? css.car : css.muted;
+        ctx.fillRect(px - 4, py - 2.6, 8, 5.2);
+      } else if (d.onFoot) {
+        ctx.fillStyle = css.walker;
+        ctx.beginPath(); ctx.arc(px, py, 2.6, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    // motorista observado
+    const wd = state.watched;
+    if (wd) {
+      ctx.strokeStyle = css.ink;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(wd.x * k, wd.y * k, 11, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    drawTrace();
+    updatePanels(dots);
+  }
+
+  function drawTrace() {
+    const w = fit(trace, tctx);
+    if (!w) return;
+    const h = trace.getBoundingClientRect().height;
+    tctx.clearRect(0, 0, w, h);
+    const d = state.watched && state.watched.detector;
+    if (!d || d.speedTrace.length < 2) return;
+
+    const data = d.speedTrace;
+    const max = 12;
+    const bands = [
+      { lo: 0, hi: CFG.stillMax, c: css.line },
+      { lo: CFG.walkMax, hi: CFG.vehicleMin, c: css.line },
+    ];
+    for (const b of bands) {
+      tctx.fillStyle = b.c;
+      tctx.globalAlpha = 0.35;
+      const y0 = h - (b.hi / max) * h, y1 = h - (b.lo / max) * h;
+      tctx.fillRect(0, y0, w, y1 - y0);
+      tctx.globalAlpha = 1;
+    }
+
+    tctx.strokeStyle = css.car;
+    tctx.lineWidth = 1.8;
+    tctx.beginPath();
+    data.forEach((v, i) => {
+      const x = (i / (data.length - 1)) * w;
+      const y = h - Math.min(1, v / max) * h;
+      i ? tctx.lineTo(x, y) : tctx.moveTo(x, y);
+    });
+    tctx.stroke();
+
+    tctx.fillStyle = css.muted;
+    tctx.font = '10px "IBM Plex Mono", monospace';
+    tctx.fillText('4,2 m/s · carro', 4, h - (CFG.vehicleMin / max) * h - 3);
+  }
+
+  const fmtTime = (s) => {
+    const h = Math.floor(s / 3600) % 24;
+    const m = Math.floor(s / 60) % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  };
+
+  function updatePanels(dots) {
+    const free = state.spots.filter((s) => !s.car).length;
+    let hits = 0;
+    for (const d of dots) {
+      if (state.spots.some((s) => !s.car && dist(s, d) <= 40)) hits++;
+    }
+    document.getElementById('clock').textContent = fmtTime(state.t);
+    document.getElementById('mFree').textContent = free;
+    document.getElementById('mDots').textContent = dots.length;
+    document.getElementById('mHit').textContent = dots.length ? `${Math.round((hits / dots.length) * 100)}%` : '—';
+    document.getElementById('mEvents').textContent = state.events;
+
+    const st = state.watched && state.watched.detector ? state.watched.detector.state : 'unknown';
+    for (const el of document.querySelectorAll('#fsm .step')) {
+      el.classList.toggle('on', el.dataset.s === st);
+    }
+    const v = state.watched && state.watched.detector ? median(state.watched.detector.speeds) : 0;
+    document.getElementById('spdNow').textContent = `${v.toFixed(1).replace('.', ',')} m/s`;
+
+    const log = document.getElementById('log');
+    if (!state.log.length) {
+      log.innerHTML = '<li class="empty">aguardando…</li>';
+    } else {
+      log.innerHTML = state.log.map((e) => {
+        const dep = e.kind === 'departure';
+        const color = dep ? 'var(--free)' : 'var(--busy)';
+        const label = dep ? 'vaga liberada' : 'vaga ocupada';
+        const conf = Math.round(e.conf * 100);
+        return `<li><span class="bar" style="background:${color}"></span>` +
+          `<span>${label} <span style="color:var(--muted)">· confiança ${conf}%</span></span>` +
+          `<span class="when">${fmtTime(e.t)}</span></li>`;
+      }).join('');
+    }
+  }
+
+  // ------------------------------------------------------------- loop e UI
+  let acc = 0;
+  function frame() {
+    if (state.playing) {
+      acc += state.speed;
+      const steps = Math.min(30, Math.floor(acc));
+      acc -= steps;
+      for (let i = 0; i < steps; i++) tick(1);
+      if (state.watched && !state.watched.hasApp) {
+        state.watched = state.drivers.find((d) => d.hasApp) || null;
+      }
+    }
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  const playBtn = document.getElementById('play');
+  playBtn.addEventListener('click', () => {
+    state.playing = !state.playing;
+    playBtn.textContent = state.playing ? 'Pausar' : 'Continuar';
+    playBtn.classList.toggle('primary', state.playing);
+  });
+  document.getElementById('reset').addEventListener('click', reset);
+  document.getElementById('speed').addEventListener('change', (e) => {
+    state.speed = Number(e.target.value);
+  });
+  const cov = document.getElementById('coverage');
+  cov.addEventListener('input', (e) => {
+    const pct = Number(e.target.value);
+    document.getElementById('coverageVal').textContent = `${pct}%`;
+    state.coverage = pct / 100;
+    // Redistribui o app entre os motoristas já existentes, sem reiniciar o mundo.
+    const wanted = Math.round(state.drivers.length * state.coverage);
+    const shuffled = [...state.drivers].sort(() => Math.random() - 0.5);
+    shuffled.forEach((d, i) => {
+      const should = i < wanted;
+      if (should && !d.detector) { d.hasApp = true; d.detector = new Detector(); }
+      if (!should && d.detector) { d.hasApp = false; d.detector = null; }
+    });
+    state.watched = state.drivers.find((d) => d.hasApp) || null;
+  });
+  document.getElementById('truth').addEventListener('change', (e) => {
+    state.showTruth = e.target.checked;
+  });
+
+  // Seleciona o motorista observado com um clique no mapa.
+  cv.addEventListener('click', (ev) => {
+    const rect = cv.getBoundingClientRect();
+    const k = rect.width / SIZE;
+    const p = { x: (ev.clientX - rect.left) / k, y: (ev.clientY - rect.top) / k };
+    let best = null, bd = 60;
+    for (const d of state.drivers) {
+      if (!d.hasApp) continue;
+      const dd = dist(d, p);
+      if (dd < bd) { bd = dd; best = d; }
+    }
+    if (best) state.watched = best;
+  });
+
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  mq.addEventListener('change', readTokens);
+  new MutationObserver(readTokens).observe(document.documentElement, {
+    attributes: true, attributeFilter: ['data-theme'],
+  });
+
+  readTokens();
+  reset();
+  frame();
+})();
+</script>

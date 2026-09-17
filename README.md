@@ -21,7 +21,7 @@ depende do usuário avisar morre por falta de aviso.
 | `packages/core` | Motor de detecção + modelo de probabilidade, TypeScript puro | **Funciona, 34 testes** |
 | `services/api` | Ingestão de eventos e consulta de pontos | **Funciona, 15 testes** |
 | `apps/mobile` | App Expo / React Native (mapa, detecção em background) | Código completo, precisa de build nativo |
-| `apps/web-demo` | Simulador visual do sistema inteiro rodando | Abre no navegador |
+| `apps/web-demo` | Simulador visual do sistema inteiro rodando | [Abrir](https://claude.ai/artifact/S75y2k8ED2SioRFks24Pxe) |
 | `docs/` | Algoritmo, arquitetura, privacidade e roadmap de produto | — |
 
 ## Rodando
@@ -78,6 +78,14 @@ cd apps/mobile && npm install && npx expo run:android
 A trajetória nunca sai do aparelho. O servidor recebe pontos soltos, sem conta,
 sem identificador, com retenção de 1 hora — ele é um agregador burro de
 propósito. Detalhes em [`docs/PRIVACIDADE.md`](docs/PRIVACIDADE.md).
+
+## Simulador visual
+
+`apps/web-demo/index.html` abre direto no navegador (ou
+[aqui](https://claude.ai/artifact/S75y2k8ED2SioRFks24Pxe)): um bairro de 720 m
+com 1176 vagas de meio-fio, 60 motoristas e os mesmos limiares do motor real.
+Dá para baixar a cobertura do app para 10% e ver o mapa esvaziar — que é o
+risco de partida a frio descrito em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 ## Documentação
 
