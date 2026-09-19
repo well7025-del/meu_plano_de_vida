@@ -1,0 +1,21 @@
+{
+  "name": "@vagas/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "assets": "node scripts/build-assets.mjs",
+    "predev": "npm run build -w @vagas/core && npm run assets",
+    "dev": "wrangler dev",
+    "predeploy": "npm run build -w @vagas/core && npm run assets",
+    "deploy": "wrangler deploy",
+    "migrar": "wrangler d1 execute vagas --remote --file=schema.sql"
+  },
+  "dependencies": {
+    "@vagas/core": "0.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "wrangler": "^4.135.0"
+  }
+}

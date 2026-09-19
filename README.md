@@ -21,6 +21,7 @@ depende do usuário avisar morre por falta de aviso.
 | `packages/core` | Motor de detecção + modelo de probabilidade, TypeScript puro | **Funciona, 34 testes** |
 | `services/api` | Ingestão de eventos e consulta de pontos | **Funciona, 15 testes** |
 | `apps/pwa` | **App web instalável, para testar na rua hoje** | **Funciona: `npm run testar`** |
+| `services/worker` | Mesma API em Cloudflare Workers + D1, para o endereço ficar fixo | **Funciona: `npm run publicar`** |
 | `apps/mobile` | App Expo / React Native (mapa, detecção em background) | Código completo, precisa de build nativo |
 | `apps/web-demo` | Simulador visual do sistema inteiro rodando | [Abrir](https://claude.ai/artifact/S75y2k8ED2SioRFks24Pxe) |
 | `docs/` | Algoritmo, arquitetura, privacidade e roadmap de produto | — |
@@ -28,11 +29,20 @@ depende do usuário avisar morre por falta de aviso.
 ## Testar na rua, hoje
 
 ```bash
+npx wrangler login    # uma vez
+npm run publicar      # publica na Cloudflare: endereço fixo, sempre no ar
+```
+
+ou, para rodar da sua própria máquina enquanto desenvolve:
+
+```bash
 npm run testar
 ```
 
-Sobe o app e o servidor juntos e, se você tiver `cloudflared`, imprime um
-endereço HTTPS público para mandar no grupo. Cada pessoa abre no celular e
+O `publicar` sobe app e API na borda da Cloudflare (banco D1 já criado) e
+devolve um endereço `https://vagas.<subdominio>.workers.dev`. O `testar` sobe
+tudo localmente e, se você tiver `cloudflared`, imprime um endereço HTTPS
+temporário. Cada pessoa abre no celular e
 adiciona à tela inicial — é um app instalável, com radar das vagas próximas,
 aviso por voz e registro de diagnóstico.
 

@@ -1,15 +1,14 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import {
-  DEFAULT_AVAILABILITY_CONFIG,
-  boundingBox,
-  cellId,
-  distanceM,
-  estimate,
-  tierOf,
+  MAX_BATCH,
+  aggregateSpots,
+  cellFor,
+  queryBox,
+  validateIncomingEvent,
   type StoredEvent,
 } from '@vagas/core';
-import { CELL_SIZE_M, insertEvent, pruneEvents, selectInBox } from './db.js';
+import { insertEvent, pruneEvents, selectInBox } from './db.js';
 import { serveStatic, type Mount } from './static.js';
 import { RateLimiter } from './ratelimit.js';
 
@@ -29,8 +28,6 @@ export interface AppOptions {
 interface IngestBody {
   events?: unknown;
 }
-
-const MAX_BATCH = 50;
 
 /**
  * API do Vagas.
@@ -115,7 +112,7 @@ export function createApp(opts: AppOptions) {
     const rejected: string[] = [];
 
     for (const item of raw) {
-      const problem = validateEvent(item, t, retentionS);
+      const problem = validateIncomingEvent(item, t, retentionS);
       if (problem) {
         rejected.push(problem);
         continue;
@@ -149,46 +146,18 @@ export function createApp(opts: AppOptions) {
     }
 
     const t = now();
-    const box = boundingBox({ lat, lon }, radius);
+    const box = queryBox({ lat, lon }, radius);
     const rows = selectInBox(db, box, t - retentionS * 1000);
+    const events: StoredEvent[] = rows.map((r) => ({
+      kind: r.kind,
+      lat: r.lat,
+      lon: r.lon,
+      t: r.t,
+      confidence: r.confidence,
+      cell: r.cell,
+    }));
 
-    const byCell = new Map<string, StoredEvent[]>();
-    for (const r of rows) {
-      const list = byCell.get(r.cell);
-      const stored: StoredEvent = {
-        kind: r.kind,
-        lat: r.lat,
-        lon: r.lon,
-        t: r.t,
-        confidence: r.confidence,
-        cell: r.cell,
-      };
-      if (list) list.push(stored);
-      else byCell.set(r.cell, [stored]);
-    }
-
-    const out = [];
-    for (const [cell, events] of byCell) {
-      const { lambda, probability } = estimate(events, t, { cellSizeM: CELL_SIZE_M });
-      if (probability < DEFAULT_AVAILABILITY_CONFIG.minProbability) continue;
-      const anchor = anchorOf(events);
-      // A consulta no banco usa caixa envolvente (quadrada) porque e o que o
-      // indice sabe fazer rapido; o raio de verdade e circular. Sem este corte
-      // o app recebe pontos ate 41% mais longe do que pediu, bem no canto.
-      if (distanceM({ lat, lon }, anchor) > radius) continue;
-      out.push({
-        cell,
-        lat: round6(anchor.lat),
-        lon: round6(anchor.lon),
-        probability: round3(probability),
-        lambda: round3(lambda),
-        tier: tierOf(probability),
-        lastEventT: Math.max(...events.map((e) => e.t)),
-        support: events.length,
-      });
-    }
-
-    out.sort((a, b) => b.probability - a.probability);
+    const out = aggregateSpots(events, { lat, lon }, radius, t);
     return json(res, 200, { now: t, spots: out.slice(0, 300) });
   }
 
@@ -207,7 +176,7 @@ export function createApp(opts: AppOptions) {
     }
 
     db.prepare('INSERT INTO feedback (cell, found, shown_p, t) VALUES (?, ?, ?, ?)').run(
-      cellId({ lat, lon }, CELL_SIZE_M),
+      cellFor({ lat, lon }),
       found ? 1 : 0,
       Number.isFinite(shownP) ? shownP : 0,
       now(),
@@ -241,41 +210,6 @@ function clientKey(req: IncomingMessage): string {
   const fwd = req.headers['x-forwarded-for'];
   const first = Array.isArray(fwd) ? fwd[0] : fwd?.split(',')[0];
   return (first ?? req.socket.remoteAddress ?? 'desconhecido').trim();
-}
-
-function anchorOf(events: StoredEvent[]): { lat: number; lon: number } {
-  const departures = events.filter((e) => e.kind === 'departure');
-  const list = departures.length > 0 ? departures : events;
-  let lat = 0;
-  let lon = 0;
-  for (const e of list) {
-    lat += e.lat;
-    lon += e.lon;
-  }
-  return { lat: lat / list.length, lon: lon / list.length };
-}
-
-/**
- * Validacao de entrada. O servidor nao confia no cliente: um app modificado
- * poderia despejar saidas falsas para esvaziar uma rua concorrente, entao
- * coordenada, horario e confianca sao checados um a um, e eventos com data no
- * futuro ou velhos demais sao recusados.
- */
-function validateEvent(item: unknown, now: number, retentionS: number): string | null {
-  if (typeof item !== 'object' || item === null) return 'nao e objeto';
-  const e = item as Record<string, unknown>;
-  if (e.kind !== 'departure' && e.kind !== 'arrival') return 'kind invalido';
-  const lat = Number(e.lat);
-  const lon = Number(e.lon);
-  if (!Number.isFinite(lat) || Math.abs(lat) > 90) return 'lat invalida';
-  if (!Number.isFinite(lon) || Math.abs(lon) > 180) return 'lon invalida';
-  const t = Number(e.t);
-  if (!Number.isFinite(t)) return 't invalido';
-  if (t > now + 60_000) return 'evento no futuro';
-  if (t < now - retentionS * 1000) return 'evento velho demais';
-  const c = Number(e.confidence);
-  if (!Number.isFinite(c) || c < 0 || c > 1) return 'confidence fora de 0..1';
-  return null;
 }
 
 function readJson(req: IncomingMessage): Promise<unknown> {
@@ -312,6 +246,3 @@ function json(res: ServerResponse, status: number, body: unknown): void {
   res.end(payload);
 }
 
-const round3 = (v: number) => Math.round(v * 1000) / 1000;
-/** ~11 cm: mais casas decimais seriam falsa precisao e rastro desnecessario. */
-const round6 = (v: number) => Math.round(v * 1e6) / 1e6;

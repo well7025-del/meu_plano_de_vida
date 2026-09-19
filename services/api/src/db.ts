@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { cellId } from '@vagas/core';
+import { CELL_SIZE_M, cellFor } from '@vagas/core';
 
 /**
  * Persistencia.
@@ -59,8 +59,6 @@ export function openDb(path = ':memory:'): DatabaseSync {
   return db;
 }
 
-export const CELL_SIZE_M = 40;
-
 export function insertEvent(
   db: DatabaseSync,
   e: { kind: 'departure' | 'arrival'; lat: number; lon: number; t: number; confidence: number },
@@ -75,7 +73,7 @@ export function insertEvent(
     e.lon,
     e.t,
     e.confidence,
-    cellId({ lat: e.lat, lon: e.lon }, CELL_SIZE_M),
+    cellFor({ lat: e.lat, lon: e.lon }),
     receivedAt,
   );
 }

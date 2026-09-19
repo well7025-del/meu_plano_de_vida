@@ -1,0 +1,25 @@
+name = "vagas"
+main = "src/index.ts"
+compatibility_date = "2026-09-19"
+
+# O app (apps/pwa) e o motor compilado (packages/core/dist) sao copiados para
+# ./public por `npm run assets`. O Worker so entra nas rotas de API; todo o
+# resto e servido direto da borda, sem cold start.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/v1/*", "/healthz"]
+
+# database_id abaixo nao e segredo: sem as credenciais da conta ele nao abre
+# nada. Fica versionado para `wrangler deploy` funcionar sem configuracao.
+[[d1_databases]]
+binding = "DB"
+database_name = "vagas"
+database_id = "1263f2dd-ca41-48bc-810b-02f6d25f41d8"
+
+[vars]
+RETENTION_S = "3600"
+WRITES_PER_MINUTE = "60"
+
+[observability]
+enabled = true

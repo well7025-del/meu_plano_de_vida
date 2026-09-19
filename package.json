@@ -13,7 +13,8 @@
     "simulate": "npm run simulate -w @vagas/core",
     "api": "npm start -w @vagas/api",
     "cobertura": "npm run cobertura -w @vagas/core",
-    "testar": "bash scripts/testar.sh"
+    "testar": "bash scripts/testar.sh",
+    "publicar": "npm run deploy -w @vagas/worker"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

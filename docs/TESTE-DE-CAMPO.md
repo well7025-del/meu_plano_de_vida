@@ -4,7 +4,32 @@ Guia para colocar o Vagas no ar hoje e testar na rua. Leva uns 15 minutos.
 
 ## 1. Subir o app
 
-No seu computador, dentro da pasta do projeto:
+### Opção A — Cloudflare (recomendada: endereço fixo, não depende do seu PC)
+
+O banco D1 já está criado e com o esquema aplicado (`vagas`,
+`1263f2dd-ca41-48bc-810b-02f6d25f41d8`), e o `wrangler.toml` já aponta para
+ele. Faltam dois comandos, no seu computador:
+
+```bash
+npx wrangler login     # abre o navegador, você autoriza
+npm run publicar       # compila, monta os arquivos e publica
+```
+
+No fim, o wrangler imprime o endereço:
+
+```
+https://vagas.<seu-subdominio>.workers.dev
+```
+
+**Esse é o endereço definitivo do teste.** Fica no ar 24 h por dia, de graça no
+plano gratuito, servido do data center mais próximo de cada pessoa. Para
+publicar uma correção depois, é `npm run publicar` de novo.
+
+Se o `wrangler login` não abrir o navegador (máquina remota, WSL), use um token
+de API em vez disso: crie em *My Profile → API Tokens* com o modelo **Edit
+Cloudflare Workers** e exporte `CLOUDFLARE_API_TOKEN=...` antes do comando.
+
+### Opção B — seu computador + túnel (para desenvolver e ver logs)
 
 ```bash
 npm run testar
@@ -29,9 +54,12 @@ Não precisa de conta.
 > conexão segura (HTTPS), e o `localhost` do seu computador não é o do celular
 > do seu amigo. O túnel resolve os dois problemas de uma vez.
 
-**Para o teste durar semanas** sem depender do seu computador ligado, há um
-`Dockerfile` na raiz: `fly launch`, Render ou Railway sobem ele direto, e aí o
-endereço é fixo.
+Há também um `Dockerfile` na raiz, se você preferir Fly.io, Render ou Railway
+em vez da Cloudflare.
+
+> **Qual usar:** a Opção A para o teste com os amigos (endereço fixo, sempre no
+> ar). A Opção B enquanto você mexe no código, porque o servidor recarrega e
+> os logs aparecem no terminal.
 
 ## 2. Instalar no celular
 

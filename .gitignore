@@ -5,3 +5,5 @@ dist/
 *.sqlite-journal
 .expo/
 .DS_Store
+.wrangler/
+services/worker/public/

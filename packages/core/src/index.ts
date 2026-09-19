@@ -5,3 +5,4 @@ export * from './detector.js';
 export * from './availability.js';
 export * from './trace.js';
 export * from './city.js';
+export * from './ingest.js';
