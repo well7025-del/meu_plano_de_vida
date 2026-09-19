@@ -101,3 +101,5 @@ risco de partida a frio descrito em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
   além do mapa de pontinhos verdes, e em que ordem
 - [`docs/NEGOCIO.md`](docs/NEGOCIO.md) — como isso vira receita, quanto custa
   servir um usuário, e o plano dos primeiros 90 dias
+- [`docs/REVISAO-IDEIAS.md`](docs/REVISAO-IDEIAS.md) — avaliação de nove ideias
+  de funcionalidade, com o que foi medido no simulador

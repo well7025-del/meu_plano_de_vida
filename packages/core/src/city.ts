@@ -35,6 +35,29 @@ export interface CityOptions {
   suggestionRadiusM: number;
   /** Distancia do destino em que ele comeca a procurar, em metros. */
   searchStartM: number;
+  /**
+   * Descarta as chegadas antes de alimentar o mapa.
+   *
+   * Serve para um experimento especifico: quanto da qualidade do mapa vem da
+   * confirmacao colaborativa ("alguem ocupou, apaga o ponto") e quanto vem
+   * apenas do decaimento temporal? Ver docs/REVISAO-IDEIAS.md.
+   */
+  ignoreArrivals?: boolean;
+  /**
+   * Modelo realista de busca: o motorista nao "reserva" a vaga de longe. Ele
+   * dirige ate a regiao do destino e so entao circula procurando, ocupando a
+   * primeira vaga livre que enxerga. E o que permite medir o tempo de procura
+   * — a metrica norte do produto — e o que faz aparecer a corrida pela vaga.
+   */
+  cruising?: boolean;
+  /** Com `cruising`, motoristas com o app dirigem ate o ponto verde. */
+  followMap?: boolean;
+  /** Distancia em que o motorista enxerga uma vaga livre ao circular (m). */
+  sightM?: number;
+  /** Raio em torno do destino onde ele aceita uma sugestao do app (m). */
+  followRadiusM?: number;
+  /** Teto para a circulacao, em segundos, para a simulacao nao travar. */
+  maxCruiseS?: number;
 }
 
 export const DEFAULT_CITY: CityOptions = {
@@ -49,6 +72,11 @@ export const DEFAULT_CITY: CityOptions = {
   origin: { lat: -23.5613, lon: -46.6565 },
   suggestionRadiusM: 150,
   searchStartM: 300,
+  cruising: false,
+  followMap: false,
+  sightM: 20,
+  followRadiusM: 150,
+  maxCruiseS: 900,
 };
 
 export interface CityResult {
@@ -70,6 +98,14 @@ export interface CityResult {
   /** Vagas livres reais no fim da simulacao. */
   freeSpots: number;
   totalSpots: number;
+  /** Tempo medio de procura (s), so com `cruising`. */
+  cruiseApp: number;
+  cruiseNoApp: number;
+  parksApp: number;
+  parksNoApp: number;
+  /** Vezes em que um motorista seguiu um ponto verde e nao achou nada la. */
+  wastedTrips: number;
+  chases: number;
 }
 
 interface Spot {
@@ -80,7 +116,7 @@ interface Spot {
   car: object | 'estatico' | null;
 }
 
-type Phase = 'away' | 'walk_to_car' | 'board' | 'drive' | 'parked' | 'walk_away';
+type Phase = 'away' | 'walk_to_car' | 'board' | 'drive' | 'cruise' | 'parked' | 'walk_away';
 
 interface Waypoint {
   x: number;
@@ -101,6 +137,10 @@ class Driver {
   detector: ParkingDetector | null;
   /** Marcado quando o motorista ja foi contado como "procurando" nesta viagem. */
   searchCounted = false;
+  /** Ponto verde que ele esta perseguindo nesta viagem, se houver. */
+  chasing: Waypoint | null = null;
+  destination: Waypoint | null = null;
+  cruiseStart = 0;
 
   constructor(
     readonly id: number,
@@ -148,6 +188,40 @@ export function runCity(options: Partial<CityOptions> = {}): CityResult {
   }
 
   const near = (a: Waypoint, b: Waypoint) => Math.hypot(a.x - b.x, a.y - b.y);
+
+  // Grade de 40 m sobre as vagas: circular procurando vaga precisa ser uma
+  // busca local, nao uma varredura das 1176 vagas a cada segundo.
+  const bucketOf = (x: number, y: number) => `${Math.floor(x / 40)}:${Math.floor(y / 40)}`;
+  const buckets = new Map<string, Spot[]>();
+  for (const sp of spots) {
+    const key = bucketOf(sp.x, sp.y);
+    const list = buckets.get(key);
+    if (list) list.push(sp);
+    else buckets.set(key, [sp]);
+  }
+  /** Vaga livre mais proxima de um ponto, dentro de `radius` metros. */
+  function nearestFree(p: Waypoint, radius: number): Spot | null {
+    const cells = Math.ceil(radius / 40);
+    const cx = Math.floor(p.x / 40);
+    const cy = Math.floor(p.y / 40);
+    let best: Spot | null = null;
+    let bd = radius;
+    for (let dx = -cells; dx <= cells; dx++) {
+      for (let dy = -cells; dy <= cells; dy++) {
+        const list = buckets.get(`${cx + dx}:${cy + dy}`);
+        if (!list) continue;
+        for (const sp of list) {
+          if (sp.car) continue;
+          const d = near(sp, p);
+          if (d < bd) {
+            bd = d;
+            best = sp;
+          }
+        }
+      }
+    }
+    return best;
+  }
   const snap = (v: number) =>
     lines.reduce((best, c) => (Math.abs(c - v) < Math.abs(best - v) ? c : best), lines[0] as number);
 
@@ -196,6 +270,12 @@ export function runCity(options: Partial<CityOptions> = {}): CityResult {
   let searches = 0;
   let withSuggestion = 0;
   let withTrueSuggestion = 0;
+  let cruiseApp = 0;
+  let cruiseNoApp = 0;
+  let parksApp = 0;
+  let parksNoApp = 0;
+  let wastedTrips = 0;
+  let chases = 0;
   let dotSamples = 0;
   let dotTotal = 0;
   let dotHits = 0;
@@ -220,6 +300,24 @@ export function runCity(options: Partial<CityOptions> = {}): CityResult {
         budget = 0;
       }
     }
+  }
+
+  /** Melhor ponto verde perto de um destino, em coordenadas do bairro. */
+  function bestDotNear(p: Waypoint, at: number): Waypoint | null {
+    const dots = index.query(center, size, at);
+    let best: Waypoint | null = null;
+    let bestP = 0;
+    for (const dot of dots) {
+      if (dot.tier === 'baixa') continue;
+      const x = (dot.lon - cfg.origin.lon) * mPerDegLon;
+      const y = (dot.lat - cfg.origin.lat) * M_PER_DEG_LAT;
+      if (Math.hypot(x - p.x, y - p.y) > (cfg.followRadiusM ?? 150)) continue;
+      if (dot.probability > bestP) {
+        bestP = dot.probability;
+        best = { x, y };
+      }
+    }
+    return best;
   }
 
   /** Um motorista com app chegando perto do destino: o mapa ajuda ou nao? */
@@ -290,6 +388,35 @@ export function runCity(options: Partial<CityOptions> = {}): CityResult {
           d.speed = 0;
           if (now - t0 >= d.until * 1000) {
             if (d.spot) d.spot.car = null;
+            d.spot = null;
+            d.searchCounted = false;
+            d.chasing = null;
+
+            if (cfg.cruising) {
+              // Escolhe um DESTINO, nao uma vaga: quem esta na rua nao sabe
+              // onde ha vaga, so para onde quer ir.
+              const far = spots[Math.floor(rand() * spots.length)] as Spot;
+              if (near(far, d) < 260) {
+                d.until = (now - t0) / 1000 + 5;
+                break;
+              }
+              d.destination = { x: far.x, y: far.y };
+              d.target = far;
+
+              let goto: Waypoint = d.destination;
+              if (d.hasApp && cfg.followMap) {
+                const suggestion = bestDotNear(d.destination, now);
+                if (suggestion) {
+                  goto = suggestion;
+                  d.chasing = suggestion;
+                  chases++;
+                }
+              }
+              d.path = route(d, goto);
+              d.phase = 'drive';
+              break;
+            }
+
             const free = spots.filter((s) => !s.car && near(s, d) > 260);
             const target = free[Math.floor(rand() * free.length)] ?? null;
             if (!target) {
@@ -299,7 +426,6 @@ export function runCity(options: Partial<CityOptions> = {}): CityResult {
             }
             target.car = d; // reserva: dois carros nao param na mesma vaga
             d.target = target;
-            d.searchCounted = false;
             d.path = route(d, target);
             d.phase = 'drive';
           }
@@ -307,15 +433,77 @@ export function runCity(options: Partial<CityOptions> = {}): CityResult {
         case 'drive':
           move(d, 7.5 + rand() * 3, dt);
           if (dots && d.hasApp) evaluateSearch(d, dots);
-          if (d.path.length === 0 && d.target) {
-            d.spot = d.target;
-            d.x = d.spot.x;
-            d.y = d.spot.y;
+          if (d.path.length === 0) {
+            if (cfg.cruising) {
+              d.phase = 'cruise';
+              d.cruiseStart = now;
+              break;
+            }
+            if (d.target) {
+              d.spot = d.target;
+              d.x = d.spot.x;
+              d.y = d.spot.y;
+              d.phase = 'parked';
+              d.until = (now - t0) / 1000 + 100 + rand() * 140;
+              d.speed = 0;
+            }
+          }
+          break;
+
+        case 'cruise': {
+          // Circulando devagar, de olho no meio-fio.
+          move(d, 4.5 + rand() * 1.5, dt);
+          const spotSeen = nearestFree(d, cfg.sightM ?? 20);
+          const elapsed = (now - d.cruiseStart) / 1000;
+
+          if (spotSeen) {
+            spotSeen.car = d;
+            d.spot = spotSeen;
+            d.x = spotSeen.x;
+            d.y = spotSeen.y;
+            if (d.hasApp) {
+              cruiseApp += elapsed;
+              parksApp++;
+              // Perseguiu um ponto verde e levou mais de um minuto: o ponto
+              // nao se sustentou — outro carro chegou primeiro, ou nunca houve.
+              if (d.chasing && elapsed > 60) wastedTrips++;
+            } else {
+              cruiseNoApp += elapsed;
+              parksNoApp++;
+            }
             d.phase = 'parked';
             d.until = (now - t0) / 1000 + 100 + rand() * 140;
             d.speed = 0;
+            break;
+          }
+
+          if (elapsed > (cfg.maxCruiseS ?? 900)) {
+            // Desistiu: vai para um estacionamento e sai da simulacao de rua.
+            if (d.hasApp) {
+              cruiseApp += elapsed;
+              parksApp++;
+              if (d.chasing) wastedTrips++;
+            } else {
+              cruiseNoApp += elapsed;
+              parksNoApp++;
+            }
+            d.phase = 'away';
+            d.until = (now - t0) / 1000 + 600 + rand() * 1200;
+            d.spot = null;
+            break;
+          }
+
+          if (d.path.length === 0) {
+            // Vira a esquina: escolhe um cruzamento vizinho.
+            const gx = snap(d.x);
+            const gy = snap(d.y);
+            const step = cfg.blockM * (rand() < 0.5 ? 1 : -1);
+            const nx = Math.max(0, Math.min(size, rand() < 0.5 ? gx + step : gx));
+            const ny = Math.max(0, Math.min(size, nx === gx ? gy + step : gy));
+            d.path = route(d, { x: nx, y: ny });
           }
           break;
+        }
         case 'parked':
           d.speed = 0;
           if (now - t0 >= d.until * 1000) {
@@ -350,6 +538,7 @@ export function runCity(options: Partial<CityOptions> = {}): CityResult {
         activityHint: null,
       };
       for (const e of d.detector.push(sample)) {
+        if (cfg.ignoreArrivals && e.kind === 'arrival') continue;
         index.add(e);
         events++;
       }
@@ -370,5 +559,11 @@ export function runCity(options: Partial<CityOptions> = {}): CityResult {
     withTrueSuggestion,
     freeSpots: spots.filter((s) => !s.car).length,
     totalSpots: spots.length,
+    cruiseApp: parksApp > 0 ? cruiseApp / parksApp : 0,
+    cruiseNoApp: parksNoApp > 0 ? cruiseNoApp / parksNoApp : 0,
+    parksApp,
+    parksNoApp,
+    wastedTrips,
+    chases,
   };
 }

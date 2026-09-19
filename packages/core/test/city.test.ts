@@ -37,3 +37,36 @@ test('a utilidade para quem procura vaga cresce com a cobertura', () => {
   const uAlta = alta.searches > 0 ? alta.withTrueSuggestion / alta.searches : 0;
   assert.ok(uAlta > uBaixa + 0.2, `utilidade ${uAlta} vs ${uBaixa}`);
 });
+
+test('no modo realista o motorista circula e ocupa a primeira vaga que encontra', () => {
+  const r = runCity({ durationS: 2 * 3600, penetration: 0.5, seed: 17, cruising: true });
+  assert.ok(r.parksApp + r.parksNoApp > 20, `poucos estacionamentos: ${r.parksApp + r.parksNoApp}`);
+  assert.ok(r.cruiseApp > 0 && r.cruiseNoApp > 0);
+  const ocupacao = 1 - r.freeSpots / r.totalSpots;
+  assert.ok(ocupacao > 0.85, `ocupacao caiu demais: ${ocupacao}`);
+});
+
+test('controle: sem seguir o mapa, quem tem app procura tanto quanto quem nao tem', () => {
+  const r = runCity({ durationS: 3 * 3600, penetration: 0.5, seed: 17, cruising: true, followMap: false });
+  assert.equal(r.chases, 0, 'ninguem deveria estar perseguindo ponto');
+  const diff = Math.abs(r.cruiseApp - r.cruiseNoApp) / Math.max(r.cruiseApp, r.cruiseNoApp);
+  assert.ok(diff < 0.35, `grupos deveriam ser equivalentes: ${r.cruiseApp} vs ${r.cruiseNoApp}`);
+});
+
+test('seguindo o mapa, parte dos motoristas persegue pontos — e parte se frustra', () => {
+  const r = runCity({ durationS: 3 * 3600, penetration: 0.5, seed: 17, cruising: true, followMap: true });
+  assert.ok(r.chases > 0, 'deveria haver perseguicao a pontos verdes');
+  assert.ok(r.wastedTrips <= r.chases);
+  // A corrida pela vaga existe: nem toda perseguicao termina bem.
+  assert.ok(r.wastedTrips > 0, 'a simulacao deveria expor viagens frustradas');
+});
+
+test('descartar as chegadas quase nao muda a precisao — quem limpa o mapa e o decaimento', () => {
+  const com = runCity({ durationS: 3 * 3600, penetration: 0.5, seed: 17 });
+  const sem = runCity({ durationS: 3 * 3600, penetration: 0.5, seed: 17, ignoreArrivals: true });
+  assert.ok(sem.avgDots > com.avgDots, 'sem cancelamento devem sobrar mais pontos');
+  assert.ok(
+    Math.abs(com.precision - sem.precision) < 0.05,
+    `diferenca de precisao maior que o esperado: ${com.precision} vs ${sem.precision}`,
+  );
+});
