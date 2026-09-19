@@ -21,20 +21,26 @@ jobs:
 
       # Sem os segredos o trabalho termina em verde com a instrução, em vez de
       # encher o repositório de falhas vermelhas antes de tudo estar pronto.
-      - name: Conferir segredos
+      - name: Conferir e limpar a credencial
         id: segredos
         env:
           # O segredo desta conta foi cadastrado como CLOUDFARE_API_TOKEN, sem
           # o L. Aceitamos os dois nomes porque o token da Cloudflare so e
           # exibido uma vez: exigir o nome certo custaria refazer o token
           # inteiro, e o fluxo nao fica melhor por isso.
-          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFARE_API_TOKEN }}
+          TOKEN_BRUTO: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFARE_API_TOKEN }}
           # Apenas os NOMES do que o GitHub entregou a esta execucao. Valor de
           # segredo nunca aparece aqui (o jq abaixo le so as chaves), e e isso
           # que distingue "nome digitado diferente" de "salvo na aba errada".
           NOMES_SEGREDOS: ${{ toJSON(secrets) }}
           NOMES_VARIAVEIS: ${{ toJSON(vars) }}
         run: |
+          # Na tela do celular a Cloudflare exibe o token quebrado em varias
+          # linhas. Copiado com o dedo em vez do botao, ele chega aqui com
+          # quebras dentro, e o wrangler morre com "invalid header value" — erro
+          # que nao diz nada sobre a causa. Tirar todo espaco em branco conserta
+          # esse caso e nao estraga um token bem colado.
+          TOKEN=$(printf '%s' "$TOKEN_BRUTO" | tr -d '[:space:]')
           if [ -z "$TOKEN" ]; then
             echo "faltando=sim" >> "$GITHUB_OUTPUT"
             segredos=$(printf '%s' "$NOMES_SEGREDOS" | jq -r 'keys | join(", ")')
@@ -57,7 +63,14 @@ jobs:
             echo "segredos disponiveis: ${segredos:-nenhum}"
             echo "variaveis disponiveis: ${variaveis:-nenhuma}"
           else
+            # Mascara o valor limpo: ele difere do segredo registrado, entao o
+            # GitHub nao o esconderia sozinho dos logs.
+            echo "::add-mask::$TOKEN"
+            echo "CLOUDFLARE_API_TOKEN=$TOKEN" >> "$GITHUB_ENV"
             echo "faltando=nao" >> "$GITHUB_OUTPUT"
+            if [ "$TOKEN" != "$TOKEN_BRUTO" ]; then
+              echo "aviso: o segredo tinha espaco ou quebra de linha; usei a versao limpa"
+            fi
           fi
 
       - uses: actions/setup-node@v4
@@ -84,7 +97,7 @@ jobs:
         if: steps.segredos.outputs.faltando == 'nao'
         uses: cloudflare/wrangler-action@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFARE_API_TOKEN }}
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           workingDirectory: services/worker
           command: deploy
 
