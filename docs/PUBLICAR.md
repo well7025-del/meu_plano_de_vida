@@ -28,8 +28,15 @@ https://vagas.well7025.workers.dev
 O token fica na sua área de transferência. Vá direto para a Tela 2 antes de
 copiar qualquer outra coisa.
 
-> Esse token permite publicar na sua conta Cloudflare. Cole só no campo da
-> Tela 2. Nunca no chat, nunca num arquivo do projeto.
+> ### ⚠️ O token é uma senha
+>
+> Ele permite publicar e apagar Workers na sua conta Cloudflare. Cole **só** no
+> campo da Tela 2.
+>
+> **Nunca mande o token em conversa, e-mail ou print** — nem para mim, nem para
+> ninguém. Eu não preciso dele: quem publica é o GitHub, lendo direto do
+> segredo. Se ele escapar, apague na hora (instruções no fim desta página) e
+> crie outro: token apagado não serve mais para nada.
 
 ---
 
@@ -106,6 +113,22 @@ Em qualquer outro caso: tire um print da tela do erro e me mande aqui.
 Na tela **Workers & Pages** existe o botão **Create application** → conectar ao
 GitHub. Funciona, mas exige digitar comandos de build no teclado do celular —
 mais chance de errar do que colar um token. Prefira o caminho acima.
+
+---
+
+## Apagar um token que vazou
+
+Se o token foi parar num print, num chat ou num arquivo, apague e crie outro.
+Leva 20 segundos e resolve o problema por completo.
+
+1. Abra <https://dash.cloudflare.com/profile/api-tokens>
+2. Ache o token na lista (o nome costuma ser *Edit Cloudflare Workers*)
+3. Toque nos três pontinhos **⋯** no fim da linha → **Delete** → confirme
+
+Um token apagado para de funcionar imediatamente, mesmo para quem já o tem em
+mãos. Publicações que já aconteceram continuam no ar normalmente.
+
+Depois é só refazer a Tela 1 e a Tela 2 com um token novo.
 
 ---
 
