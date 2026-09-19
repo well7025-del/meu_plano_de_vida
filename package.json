@@ -11,7 +11,8 @@
     "build": "npm run build -w @vagas/core",
     "test": "npm run test -w @vagas/core && npm run test -w @vagas/api",
     "simulate": "npm run simulate -w @vagas/core",
-    "api": "npm start -w @vagas/api"
+    "api": "npm start -w @vagas/api",
+    "cobertura": "npm run cobertura -w @vagas/core"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

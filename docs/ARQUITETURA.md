@@ -64,8 +64,16 @@ retenção longa.
 ## Partida a frio — o problema de verdade
 
 Um app colaborativo sem usuários mostra um mapa vazio, e um mapa vazio não
-atrai usuários. Esse, e não o algoritmo, é o risco que mata o projeto. Três
-saídas, aplicadas em conjunto:
+atrai usuários. Esse, e não o algoritmo, é o risco que mata o projeto.
+
+O tamanho do risco foi medido, não estimado: `npm run cobertura` roda o mesmo
+bairro variando só a penetração. A utilidade do mapa salta de 41% para 73%
+entre 6 e 18 motoristas com o app circulando em 0,5 km² — da ordem de algumas
+centenas de instalações naquele bairro, não de milhões na cidade. A tabela
+completa e as fontes de dados que encurtam esse caminho estão em
+[DADOS.md](DADOS.md).
+
+Três saídas, aplicadas em conjunto:
 
 1. **Densidade antes de amplitude.** Lançar em *um* bairro, não em uma cidade.
    Em 4 km² com 2 mil usuários o mapa parece vivo; os mesmos 2 mil espalhados

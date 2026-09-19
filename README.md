@@ -30,6 +30,7 @@ depende do usuário avisar morre por falta de aviso.
 npm install
 npm test          # 49 testes: motor + API
 npm run simulate  # simulação de campo com 60 motoristas e medição de acerto
+npm run cobertura # quantos usuários o bairro precisa para o mapa ser útil
 npm run api       # sobe a API em http://localhost:8787
 ```
 
@@ -94,5 +95,7 @@ risco de partida a frio descrito em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
 - [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) — componentes, escala, custo,
   e o problema de partida a frio
 - [`docs/PRIVACIDADE.md`](docs/PRIVACIDADE.md) — o que sai do celular e por quê
+- [`docs/DADOS.md`](docs/DADOS.md) — de onde vêm os dados antes de existirem
+  usuários, e quantos usuários o bairro precisa de fato
 - [`docs/PRODUTO.md`](docs/PRODUTO.md) — o roadmap: o que eu acrescentaria
   além do mapa de pontinhos verdes, e em que ordem
