@@ -35,12 +35,15 @@ jobs:
           NOMES_SEGREDOS: ${{ toJSON(secrets) }}
           NOMES_VARIAVEIS: ${{ toJSON(vars) }}
         run: |
-          # Na tela do celular a Cloudflare exibe o token quebrado em varias
-          # linhas. Copiado com o dedo em vez do botao, ele chega aqui com
-          # quebras dentro, e o wrangler morre com "invalid header value" — erro
-          # que nao diz nada sobre a causa. Tirar todo espaco em branco conserta
-          # esse caso e nao estraga um token bem colado.
+          # A tela de token da Cloudflare, no celular, tem duas armadilhas: ela
+          # quebra o token em varias linhas (copiado com o dedo, vem com quebras
+          # dentro) e oferece um segundo botao de copiar, o do comando curl de
+          # teste — que traz 'Authorization: Bearer <token>' junto. Os dois casos
+          # chegam aqui como "formato invalido" sem dizer por que. Normalizamos
+          # os dois e validamos o resultado.
           TOKEN=$(printf '%s' "$TOKEN_BRUTO" | tr -d '[:space:]')
+          case "$TOKEN" in *Bearer*) TOKEN="${TOKEN##*Bearer}" ;; esac
+          TOKEN=$(printf '%s' "$TOKEN" | tr -d '"'"'"'`\\')
           if [ -z "$TOKEN" ]; then
             echo "faltando=sim" >> "$GITHUB_OUTPUT"
             segredos=$(printf '%s' "$NOMES_SEGREDOS" | jq -r 'keys | join(", ")')
@@ -66,10 +69,27 @@ jobs:
             # Mascara o valor limpo: ele difere do segredo registrado, entao o
             # GitHub nao o esconderia sozinho dos logs.
             echo "::add-mask::$TOKEN"
+
+            if ! printf '%s' "$TOKEN" | grep -qE '^[A-Za-z0-9_.~-]{25,200}$'; then
+              {
+                echo "### O segredo nao parece um token"
+                echo ""
+                echo "Depois de limpar espacos, aspas e o \`Bearer\`, sobrou algo com"
+                echo "**${#TOKEN} caracteres** que nao tem a cara de um token da Cloudflare."
+                echo ""
+                echo "Refaca o segredo copiando **so o token**, pelo botao de copiar da"
+                echo "caixa pontilhada — nao o do comando \`curl\` logo abaixo dela."
+                echo ""
+                echo "Passo a passo: [docs/PUBLICAR.md](../blob/HEAD/docs/PUBLICAR.md)"
+              } >> "$GITHUB_STEP_SUMMARY"
+              echo "::error::o segredo tem ${#TOKEN} caracteres e nao parece um token da Cloudflare"
+              exit 1
+            fi
+
             echo "CLOUDFLARE_API_TOKEN=$TOKEN" >> "$GITHUB_ENV"
             echo "faltando=nao" >> "$GITHUB_OUTPUT"
             if [ "$TOKEN" != "$TOKEN_BRUTO" ]; then
-              echo "aviso: o segredo tinha espaco ou quebra de linha; usei a versao limpa"
+              echo "o segredo veio com espacos, aspas ou o comando curl em volta; usei so o token"
             fi
           fi
 
@@ -95,19 +115,19 @@ jobs:
 
       - name: Publicar
         if: steps.segredos.outputs.faltando == 'nao'
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
-          workingDirectory: services/worker
-          command: deploy
+        working-directory: services/worker
+        run: |
+          set -o pipefail
+          npx wrangler deploy 2>&1 | tee ../../deploy.log
 
       - name: Endereço do teste
         if: steps.segredos.outputs.faltando == 'nao'
         run: |
+          url=$(grep -oE 'https://[A-Za-z0-9.-]+\.workers\.dev' deploy.log | head -1)
           {
             echo "### Publicado"
             echo ""
-            echo "Endereço do teste: <https://vagas.well7025.workers.dev>"
+            echo "O app esta no ar em <${url:-https://vagas.well7025.workers.dev}>"
             echo ""
             echo "É esse o link para mandar no grupo."
           } >> "$GITHUB_STEP_SUMMARY"
