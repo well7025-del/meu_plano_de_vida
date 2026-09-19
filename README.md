@@ -47,8 +47,8 @@ ou, para rodar da sua própria máquina enquanto desenvolve:
 npm run testar
 ```
 
-O `publicar` sobe app e API na borda da Cloudflare (banco D1 já criado) e
-devolve um endereço `https://vagas.<subdominio>.workers.dev`. O `testar` sobe
+O `publicar` sobe app e API na borda da Cloudflare (banco D1 e conta já
+configurados) — o endereço do teste é `https://vagas.well7025.workers.dev`. O `testar` sobe
 tudo localmente e, se você tiver `cloudflared`, imprime um endereço HTTPS
 temporário. Cada pessoa abre no celular e
 adiciona à tela inicial — é um app instalável, com radar das vagas próximas,

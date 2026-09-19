@@ -8,7 +8,7 @@ npm run publicar       # da raiz do repositório
 ```
 
 O que acontece: compila o motor, copia `apps/pwa` + `packages/core/dist` para
-`services/worker/public`, e publica. O app sai direto da borda (sem cold
+`services/worker/public`, e publica em <https://vagas.well7025.workers.dev>. O app sai direto da borda (sem cold
 start); o Worker só é invocado em `/v1/*` e `/healthz`.
 
 ## O banco

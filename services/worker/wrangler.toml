@@ -2,6 +2,11 @@ name = "vagas"
 main = "src/index.ts"
 compatibility_date = "2026-09-19"
 
+# Identificador da conta, nao credencial: ele aparece no proprio endereco da
+# dashboard e nao abre nada sozinho. Fica aqui para o wrangler nao precisar
+# adivinhar a conta nem depender de mais um segredo no CI.
+account_id = "fae10c49f049e1a5d190c49d82e55c99"
+
 # O app (apps/pwa) e o motor compilado (packages/core/dist) sao copiados para
 # ./public por `npm run assets`. O Worker so entra nas rotas de API; todo o
 # resto e servido direto da borda, sem cold start.

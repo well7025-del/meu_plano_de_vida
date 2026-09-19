@@ -30,14 +30,13 @@ jobs:
         id: segredos
         env:
           TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CONTA: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          if [ -z "$TOKEN" ] || [ -z "$CONTA" ]; then
+          if [ -z "$TOKEN" ]; then
             echo "faltando=sim" >> "$GITHUB_OUTPUT"
             {
-              echo "### Faltam os segredos da Cloudflare"
+              echo "### Falta o segredo da Cloudflare"
               echo ""
-              echo "Cadastre \`CLOUDFLARE_API_TOKEN\` e \`CLOUDFLARE_ACCOUNT_ID\` em"
+              echo "Cadastre \`CLOUDFLARE_API_TOKEN\` em"
               echo "**Settings → Secrets and variables → Actions** e rode de novo."
               echo ""
               echo "Passo a passo: [docs/PUBLICAR.md](../blob/HEAD/docs/PUBLICAR.md)"
@@ -71,7 +70,6 @@ jobs:
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: services/worker
           command: deploy
 
@@ -81,6 +79,7 @@ jobs:
           {
             echo "### Publicado"
             echo ""
-            echo "O endereço aparece no passo **Publicar**, na linha que termina em"
-            echo "\`workers.dev\`. É ele que você manda no grupo."
+            echo "Endereço do teste: <https://vagas.well7025.workers.dev>"
+            echo ""
+            echo "É esse o link para mandar no grupo."
           } >> "$GITHUB_STEP_SUMMARY"

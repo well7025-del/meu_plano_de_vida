@@ -18,10 +18,10 @@ npx wrangler login     # abre o navegador, você autoriza
 npm run publicar       # compila, monta os arquivos e publica
 ```
 
-No fim, o wrangler imprime o endereço:
+No fim sai o endereço — na sua conta, já se sabe qual é:
 
 ```
-https://vagas.<seu-subdominio>.workers.dev
+https://vagas.well7025.workers.dev
 ```
 
 **Esse é o endereço definitivo do teste.** Fica no ar 24 h por dia, de graça no
