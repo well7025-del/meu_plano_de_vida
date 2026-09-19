@@ -1,0 +1,86 @@
+# Publica o Vagas na Cloudflare sem precisar de terminal.
+#
+# Depois de cadastrar os dois segredos (ver docs/PUBLICAR.md), dá para publicar
+# clicando em "Run workflow" na aba Actions do GitHub. Cada push nas pastas do
+# app também republica.
+name: Publicar o Vagas
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/vagas-parking-detection-app-o30hao
+      - main
+    paths:
+      - 'apps/pwa/**'
+      - 'packages/core/**'
+      - 'services/worker/**'
+      - '.github/workflows/publicar.yml'
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Sem os segredos o trabalho termina em verde com a instrução, em vez de
+      # encher o repositório de falhas vermelhas antes de tudo estar pronto.
+      - name: Conferir segredos
+        id: segredos
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CONTA: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$CONTA" ]; then
+            echo "faltando=sim" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Faltam os segredos da Cloudflare"
+              echo ""
+              echo "Cadastre \`CLOUDFLARE_API_TOKEN\` e \`CLOUDFLARE_ACCOUNT_ID\` em"
+              echo "**Settings → Secrets and variables → Actions** e rode de novo."
+              echo ""
+              echo "Passo a passo: [docs/PUBLICAR.md](../blob/HEAD/docs/PUBLICAR.md)"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "faltando=nao" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.segredos.outputs.faltando == 'nao'
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Instalar
+        if: steps.segredos.outputs.faltando == 'nao'
+        run: npm ci
+
+      - name: Testar
+        if: steps.segredos.outputs.faltando == 'nao'
+        run: npm test
+
+      - name: Montar o app
+        if: steps.segredos.outputs.faltando == 'nao'
+        run: |
+          npm run build -w @vagas/core
+          npm run assets -w @vagas/worker
+
+      - name: Publicar
+        if: steps.segredos.outputs.faltando == 'nao'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: services/worker
+          command: deploy
+
+      - name: Endereço do teste
+        if: steps.segredos.outputs.faltando == 'nao'
+        run: |
+          {
+            echo "### Publicado"
+            echo ""
+            echo "O endereço aparece no passo **Publicar**, na linha que termina em"
+            echo "\`workers.dev\`. É ele que você manda no grupo."
+          } >> "$GITHUB_STEP_SUMMARY"

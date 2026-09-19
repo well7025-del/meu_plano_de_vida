@@ -4,6 +4,9 @@ Guia para colocar o Vagas no ar hoje e testar na rua. Leva uns 15 minutos.
 
 ## 1. Subir o app
 
+> **Sem terminal?** Há um caminho só de cliques, pelo GitHub, em
+> [PUBLICAR.md](PUBLICAR.md). Comece por ele se a Opção A não funcionar.
+
 ### Opção A — Cloudflare (recomendada: endereço fixo, não depende do seu PC)
 
 O banco D1 já está criado e com o esquema aplicado (`vagas`,

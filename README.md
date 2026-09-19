@@ -28,6 +28,11 @@ depende do usuário avisar morre por falta de aviso.
 
 ## Testar na rua, hoje
 
+**Sem terminal:** cadastre dois segredos no GitHub e clique em *Run workflow* —
+o passo a passo com os links está em [`docs/PUBLICAR.md`](docs/PUBLICAR.md).
+
+**Com terminal:**
+
 ```bash
 npx wrangler login    # uma vez
 npm run publicar      # publica na Cloudflare: endereço fixo, sempre no ar
@@ -128,5 +133,7 @@ risco de partida a frio descrito em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
   servir um usuário, e o plano dos primeiros 90 dias
 - [`docs/REVISAO-IDEIAS.md`](docs/REVISAO-IDEIAS.md) — avaliação de nove ideias
   de funcionalidade, com o que foi medido no simulador
+- [`docs/PUBLICAR.md`](docs/PUBLICAR.md) — como colocar o app no ar, com e sem
+  terminal
 - [`docs/TESTE-DE-CAMPO.md`](docs/TESTE-DE-CAMPO.md) — como rodar o piloto com
   amigos e o que anotar
