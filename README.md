@@ -28,8 +28,9 @@ depende do usuário avisar morre por falta de aviso.
 
 ## Testar na rua, hoje
 
-**Sem terminal:** cadastre dois segredos no GitHub e clique em *Run workflow* —
-o passo a passo com os links está em [`docs/PUBLICAR.md`](docs/PUBLICAR.md).
+**Pelo celular, sem terminal:** criar um token na Cloudflare e colar num campo
+do GitHub. O passo a passo, tela por tela, está em
+[`docs/PUBLICAR.md`](docs/PUBLICAR.md).
 
 **Com terminal:**
 

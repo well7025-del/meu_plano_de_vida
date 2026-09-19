@@ -11,11 +11,6 @@ on:
     branches:
       - claude/vagas-parking-detection-app-o30hao
       - main
-    paths:
-      - 'apps/pwa/**'
-      - 'packages/core/**'
-      - 'services/worker/**'
-      - '.github/workflows/publicar.yml'
 
 jobs:
   publicar:
