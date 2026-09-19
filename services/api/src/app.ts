@@ -4,11 +4,14 @@ import {
   DEFAULT_AVAILABILITY_CONFIG,
   boundingBox,
   cellId,
+  distanceM,
   estimate,
   tierOf,
   type StoredEvent,
 } from '@vagas/core';
 import { CELL_SIZE_M, insertEvent, pruneEvents, selectInBox } from './db.js';
+import { serveStatic, type Mount } from './static.js';
+import { RateLimiter } from './ratelimit.js';
 
 export interface AppOptions {
   db: DatabaseSync;
@@ -17,6 +20,10 @@ export interface AppOptions {
   /** Raio maximo aceito em uma consulta, em metros. */
   maxRadiusM?: number;
   now?: () => number;
+  /** Pastas servidas como arquivo estatico (o app e o motor compilado). */
+  staticMounts?: Mount[];
+  /** Escritas por IP por minuto. 0 desliga (usado nos testes). */
+  writesPerMinute?: number;
 }
 
 interface IngestBody {
@@ -38,6 +45,9 @@ export function createApp(opts: AppOptions) {
   const retentionS = opts.retentionS ?? 3600;
   const maxRadiusM = opts.maxRadiusM ?? 3000;
   const now = opts.now ?? (() => Date.now());
+  const mounts = opts.staticMounts ?? [];
+  const writeLimit = opts.writesPerMinute ?? 0;
+  const limiter = writeLimit > 0 ? new RateLimiter(writeLimit, 60_000, now) : null;
 
   async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const url = new URL(req.url ?? '/', 'http://localhost');
@@ -49,6 +59,9 @@ export function createApp(opts: AppOptions) {
       }
 
       if (req.method === 'POST' && path === '/v1/events') {
+        if (limiter && !limiter.allow(clientKey(req))) {
+          return json(res, 429, { error: 'rate_limited' });
+        }
         return await ingest(req, res);
       }
 
@@ -57,6 +70,9 @@ export function createApp(opts: AppOptions) {
       }
 
       if (req.method === 'POST' && path === '/v1/feedback') {
+        if (limiter && !limiter.allow(clientKey(req))) {
+          return json(res, 429, { error: 'rate_limited' });
+        }
         return await feedback(req, res);
       }
 
@@ -74,6 +90,8 @@ export function createApp(opts: AppOptions) {
           hitRate: fb.n > 0 ? (fb.hits ?? 0) / fb.n : null,
         });
       }
+
+      if (serveStatic(mounts, req, res, path)) return;
 
       return json(res, 404, { error: 'not_found' });
     } catch (err) {
@@ -154,6 +172,10 @@ export function createApp(opts: AppOptions) {
       const { lambda, probability } = estimate(events, t, { cellSizeM: CELL_SIZE_M });
       if (probability < DEFAULT_AVAILABILITY_CONFIG.minProbability) continue;
       const anchor = anchorOf(events);
+      // A consulta no banco usa caixa envolvente (quadrada) porque e o que o
+      // indice sabe fazer rapido; o raio de verdade e circular. Sem este corte
+      // o app recebe pontos ate 41% mais longe do que pediu, bem no canto.
+      if (distanceM({ lat, lon }, anchor) > radius) continue;
       out.push({
         cell,
         lat: round6(anchor.lat),
@@ -212,6 +234,13 @@ export function createApp(opts: AppOptions) {
   });
 
   return { server, handle };
+}
+
+/** Identifica a origem da requisicao atras de um proxy ou tunel. */
+function clientKey(req: IncomingMessage): string {
+  const fwd = req.headers['x-forwarded-for'];
+  const first = Array.isArray(fwd) ? fwd[0] : fwd?.split(',')[0];
+  return (first ?? req.socket.remoteAddress ?? 'desconhecido').trim();
 }
 
 function anchorOf(events: StoredEvent[]): { lat: number; lon: number } {

@@ -6,7 +6,11 @@ import { openDb } from '../src/db.js';
 
 const db = openDb(':memory:');
 let now = Date.UTC(2026, 0, 15, 12, 0, 0);
-const { server } = createApp({ db, now: () => now });
+const { server } = createApp({
+  db,
+  now: () => now,
+  staticMounts: [{ prefix: '', dir: new URL('../../../apps/pwa', import.meta.url).pathname }],
+});
 let base = '';
 
 const SP = { lat: -23.5613, lon: -46.6565 };
@@ -146,4 +150,50 @@ test('json invalido nao derruba o servidor', async () => {
   });
   assert.equal(res.status, 500);
   assert.equal((await get('/healthz')).status, 200);
+});
+
+test('a consulta nao devolve pontos fora do raio pedido (o canto da caixa)', async () => {
+  const centro = { lat: -23.6, lon: -46.7 };
+  // ~700 m ao norte e ~700 m a leste: dentro da caixa de 800 m, mas a 990 m
+  // do centro — fora do circulo.
+  const canto = { lat: centro.lat + 0.0063, lon: centro.lon + 0.0069 };
+  await post('/v1/events', { events: [ev('departure', 30, canto)] });
+
+  const r = await get(`/v1/spots?lat=${centro.lat}&lon=${centro.lon}&radius=800`);
+  assert.equal(r.body.spots.length, 0, 'ponto no canto da caixa nao deveria aparecer');
+
+  const amplo = await get(`/v1/spots?lat=${centro.lat}&lon=${centro.lon}&radius=1200`);
+  assert.equal(amplo.body.spots.length, 1);
+});
+
+test('o app e servido junto com a API', async () => {
+  const res = await fetch(base + '/');
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get('content-type') ?? '', /text\/html/);
+  assert.match(await res.text(), /<title>Vagas<\/title>/);
+});
+
+test('nao da para escapar da pasta servida', async () => {
+  for (const alvo of ['/../../../etc/passwd', '/%2e%2e/%2e%2e/etc/passwd', '/..%2f..%2fetc/passwd']) {
+    const res = await fetch(base + alvo);
+    assert.ok(res.status === 404 || res.status === 400, `${alvo} devolveu ${res.status}`);
+  }
+});
+
+test('limite de taxa barra enxurrada de escrita', async () => {
+  const db2 = openDb(':memory:');
+  const app2 = createApp({ db: db2, now: () => now, writesPerMinute: 3 });
+  await new Promise<void>((r) => app2.server.listen(0, r));
+  const p = (app2.server.address() as AddressInfo).port;
+  const url = `http://127.0.0.1:${p}/v1/events`;
+  const body = JSON.stringify({ events: [ev('departure', 10)] });
+
+  const codes: number[] = [];
+  for (let i = 0; i < 5; i++) {
+    const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body });
+    codes.push(res.status);
+  }
+  assert.equal(codes.filter((c) => c === 429).length, 2, `codigos: ${codes}`);
+  app2.server.close();
+  db2.close();
 });

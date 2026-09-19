@@ -12,7 +12,8 @@
     "test": "npm run test -w @vagas/core && npm run test -w @vagas/api",
     "simulate": "npm run simulate -w @vagas/core",
     "api": "npm start -w @vagas/api",
-    "cobertura": "npm run cobertura -w @vagas/core"
+    "cobertura": "npm run cobertura -w @vagas/core",
+    "testar": "bash scripts/testar.sh"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

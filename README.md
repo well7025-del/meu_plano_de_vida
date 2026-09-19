@@ -20,18 +20,33 @@ depende do usuário avisar morre por falta de aviso.
 |---|---|---|
 | `packages/core` | Motor de detecção + modelo de probabilidade, TypeScript puro | **Funciona, 34 testes** |
 | `services/api` | Ingestão de eventos e consulta de pontos | **Funciona, 15 testes** |
+| `apps/pwa` | **App web instalável, para testar na rua hoje** | **Funciona: `npm run testar`** |
 | `apps/mobile` | App Expo / React Native (mapa, detecção em background) | Código completo, precisa de build nativo |
 | `apps/web-demo` | Simulador visual do sistema inteiro rodando | [Abrir](https://claude.ai/artifact/S75y2k8ED2SioRFks24Pxe) |
 | `docs/` | Algoritmo, arquitetura, privacidade e roadmap de produto | — |
 
-## Rodando
+## Testar na rua, hoje
+
+```bash
+npm run testar
+```
+
+Sobe o app e o servidor juntos e, se você tiver `cloudflared`, imprime um
+endereço HTTPS público para mandar no grupo. Cada pessoa abre no celular e
+adiciona à tela inicial — é um app instalável, com radar das vagas próximas,
+aviso por voz e registro de diagnóstico.
+
+O passo a passo do piloto, a mensagem pronta para o grupo e o que anotar estão
+em [`docs/TESTE-DE-CAMPO.md`](docs/TESTE-DE-CAMPO.md).
+
+## Desenvolvendo
 
 ```bash
 npm install
-npm test          # 49 testes: motor + API
+npm test          # 62 testes: motor + API
 npm run simulate  # simulação de campo com 60 motoristas e medição de acerto
 npm run cobertura # quantos usuários o bairro precisa para o mapa ser útil
-npm run api       # sobe a API em http://localhost:8787
+npm run api       # sobe a API + o app em http://localhost:8787
 ```
 
 O simulador gera trajetos sintéticos de GPS com ruído, sabe onde cada carro
@@ -103,3 +118,5 @@ risco de partida a frio descrito em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
   servir um usuário, e o plano dos primeiros 90 dias
 - [`docs/REVISAO-IDEIAS.md`](docs/REVISAO-IDEIAS.md) — avaliação de nove ideias
   de funcionalidade, com o que foi medido no simulador
+- [`docs/TESTE-DE-CAMPO.md`](docs/TESTE-DE-CAMPO.md) — como rodar o piloto com
+  amigos e o que anotar

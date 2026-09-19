@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#0b1210">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vagas">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>Vagas</title>
+<style>
+  :root {
+    --bg: #0b1210;
+    --surface: #131d19;
+    --surface-2: #1a2621;
+    --line: #24332c;
+    --ink: #e6efe9;
+    --muted: #8ba095;
+    --free: #3ddb78;
+    --medium: #f0a93a;
+    --busy: #e2685e;
+    --car: #5fb6e6;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    overscroll-behavior: none;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  #app { display: flex; flex-direction: column; height: 100%; }
+
+  header {
+    display: flex; align-items: center; gap: 10px;
+    padding: calc(10px + var(--safe-top)) 16px 10px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  header .brand { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; flex: 1; }
+  .pill {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted);
+    white-space: nowrap;
+  }
+  .pill.on { color: var(--free); border-color: color-mix(in srgb, var(--free) 45%, transparent); }
+  .pill.warn { color: var(--medium); border-color: color-mix(in srgb, var(--medium) 45%, transparent); }
+
+  main { flex: 1; overflow-y: auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+  .card h2 {
+    margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  /* estado do motor */
+  .state { display: flex; align-items: center; gap: 14px; }
+  .state .icon { font-size: 30px; line-height: 1; }
+  .state .txt { flex: 1; min-width: 0; }
+  .state .now { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .state .sub { font-size: 13px; color: var(--muted); }
+  .gauges { display: flex; gap: 18px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .gauge { flex: 1; }
+  .gauge .v { font-size: 19px; font-weight: 700; }
+  .gauge .l { font-size: 11px; color: var(--muted); }
+
+  canvas#radar { display: block; width: 100%; aspect-ratio: 1 / 1; max-width: 100%; border-radius: 12px; }
+
+  ul.spots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  ul.spots li {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid transparent;
+  }
+  ul.spots li.alta { border-color: color-mix(in srgb, var(--free) 35%, transparent); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+  .spotinfo { flex: 1; min-width: 0; }
+  .spotinfo .d { font-size: 16px; font-weight: 700; }
+  .spotinfo .m { font-size: 12px; color: var(--muted); }
+
+  button {
+    font: inherit; font-weight: 600; color: var(--ink);
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 12px; padding: 11px 14px; cursor: pointer;
+  }
+  button:active { transform: scale(0.985); }
+  button.primary { background: var(--free); border-color: var(--free); color: #04140b; }
+  button.ghost { background: transparent; }
+  button.small { padding: 7px 11px; font-size: 13px; border-radius: 10px; }
+  button:disabled { opacity: 0.45; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+
+  .log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; max-height: 260px; overflow-y: auto; }
+  .log li { display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: baseline; font-size: 13px; }
+  .log .t { font-size: 11px; color: var(--muted); }
+  .log .k { font-size: 11px; color: var(--muted); }
+
+  footer {
+    display: flex; gap: 10px; padding: 10px 16px calc(10px + var(--safe-bottom));
+    border-top: 1px solid var(--line); background: var(--surface);
+  }
+  footer button { flex: 1; }
+
+  .muted { color: var(--muted); font-size: 13px; }
+  .warn {
+    background: #2e2410; border: 1px solid #4a3a16; color: #f6d489;
+    border-radius: 12px; padding: 11px 13px; font-size: 13px;
+  }
+
+  /* abertura */
+  #welcome { padding: 24px 20px calc(24px + var(--safe-bottom)); display: flex; flex-direction: column; gap: 16px; height: 100%; overflow-y: auto; }
+  #welcome h1 { margin: 0; font-size: 30px; letter-spacing: -0.02em; }
+  #welcome p { margin: 0; font-size: 15px; color: var(--muted); }
+  #welcome ul { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14.5px; display: flex; flex-direction: column; gap: 7px; }
+  #welcome ul b { color: var(--ink); font-weight: 600; }
+  #welcome .spacer { flex: 1; min-height: 10px; }
+
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<section id="welcome">
+  <h1>Vagas</h1>
+  <p>Teste de campo. O app percebe sozinho, pelo movimento do seu celular, quando um
+     carro deixa uma vaga na rua — e avisa quem está procurando.</p>
+
+  <div class="card">
+    <h2>O que sai do seu celular</h2>
+    <ul>
+      <li>Quando o app conclui que uma vaga abriu ou foi ocupada, ele envia <b>três coisas</b>:
+          o ponto aproximado, o horário e o quanto ele confia nisso.</li>
+      <li><b>Sem nome, sem conta, sem identificador do aparelho.</b></li>
+      <li>Seu trajeto <b>não sai daqui</b>. A detecção roda dentro do celular.</li>
+      <li>Os eventos são apagados do servidor depois de <b>1 hora</b>.</li>
+    </ul>
+  </div>
+
+  <div class="warn">
+    Durante o teste, deixe o app <b>aberto e a tela ligada</b> — de preferência o celular
+    no suporte e no carregador. O navegador congela o app quando a tela apaga, e a
+    detecção para.
+  </div>
+
+  <div class="spacer"></div>
+  <button class="primary" id="btnStart">Permitir localização e começar</button>
+  <p class="muted" style="text-align:center">Você pode parar a qualquer momento.</p>
+</section>
+
+<div id="app" hidden>
+  <header>
+    <span class="brand">Vagas</span>
+    <span class="pill" id="pillGps">GPS —</span>
+    <span class="pill" id="pillTrack">parado</span>
+  </header>
+
+  <main>
+    <div id="banner" class="warn" hidden></div>
+
+    <div class="card">
+      <div class="state">
+        <span class="icon" id="stIcon">⏸</span>
+        <span class="txt">
+          <div class="now" id="stNow">Iniciando…</div>
+          <div class="sub" id="stSub">procurando sinal de GPS</div>
+        </span>
+      </div>
+      <div class="gauges">
+        <span class="gauge"><div class="v mono" id="gSpeed">—</div><div class="l">km/h</div></span>
+        <span class="gauge"><div class="v mono" id="gAcc">—</div><div class="l">precisão (m)</div></span>
+        <span class="gauge"><div class="v mono" id="gEvents">0</div><div class="l">detecções</div></span>
+      </div>
+    </div>
+
+    <div class="card" id="cardCar" hidden>
+      <h2>Seu carro</h2>
+      <div class="state">
+        <span class="icon">🚗</span>
+        <span class="txt">
+          <div class="now" id="carDist">—</div>
+          <div class="sub" id="carWhen">—</div>
+        </span>
+        <button class="small ghost" id="btnForget">Esquecer</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Vagas prováveis perto de você</h2>
+      <canvas id="radar" width="640" height="640" aria-label="Vagas prováveis ao redor"></canvas>
+      <ul class="spots" id="spotList" style="margin-top:12px"></ul>
+      <p class="muted" id="spotEmpty">Nenhuma vaga sinalizada por perto ainda.</p>
+    </div>
+
+    <div class="card" id="cardDiag" hidden>
+      <h2>Diagnóstico</h2>
+      <p class="muted" id="diagSummary">—</p>
+      <ul class="log" id="log"></ul>
+      <div class="row" style="margin-top:12px">
+        <button class="small ghost" id="btnCopy">Copiar registro</button>
+        <button class="small ghost" id="btnReset">Limpar</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <button id="btnSearch">🔎 Procurar vaga</button>
+    <button class="ghost" id="btnDiag">Diagnóstico</button>
+  </footer>
+</div>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>
