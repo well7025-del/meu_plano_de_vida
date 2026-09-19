@@ -99,3 +99,5 @@ risco de partida a frio descrito em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
   usuários, e quantos usuários o bairro precisa de fato
 - [`docs/PRODUTO.md`](docs/PRODUTO.md) — o roadmap: o que eu acrescentaria
   além do mapa de pontinhos verdes, e em que ordem
+- [`docs/NEGOCIO.md`](docs/NEGOCIO.md) — como isso vira receita, quanto custa
+  servir um usuário, e o plano dos primeiros 90 dias

@@ -62,7 +62,8 @@ multa que o app causou. Vem do OSM + dados abertos da prefeitura.
 **6. Pagamento do rotativo no próprio app**, com aviso de vencimento. O
 lembrete de "seu tempo acaba em 10 min" é sozinho um motivo para abrir o app
 todo dia — e a integração com as operadoras de zona azul é a via mais direta de
-monetização sem tocar em dado de localização.
+monetização sem tocar em dado de localização. A conta fechada está em
+[NEGOCIO.md](NEGOCIO.md).
 
 **7. Alerta de estacionamento irregular.** Detectou chegada em cima de uma
 restrição: *"aqui é proibido das 7h às 9h"*, na hora em que a pessoa sai do
