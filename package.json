@@ -14,7 +14,7 @@
     "api": "npm start -w @vagas/api",
     "cobertura": "npm run cobertura -w @vagas/core",
     "testar": "bash scripts/testar.sh",
-    "publicar": "npm run deploy -w @vagas/worker"
+    "publicar": "node scripts/publicar.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

@@ -38,6 +38,9 @@ npx wrangler login    # uma vez
 npm run publicar      # publica na Cloudflare: endereço fixo, sempre no ar
 ```
 
+Quando a publicação falha, o `publicar` traduz o erro da Cloudflare em uma
+instrução do que fazer, em vez de despejar o log.
+
 ou, para rodar da sua própria máquina enquanto desenvolve:
 
 ```bash

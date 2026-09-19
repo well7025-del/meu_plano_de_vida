@@ -8,6 +8,23 @@ O GitHub compila e publica para você.
 
 ---
 
+## Passo 0 — Ativar os Workers na conta (conta nova precisa disso)
+
+Numa conta recém-criada, os Workers só ficam disponíveis depois que você entra
+na área uma vez e escolhe o subdomínio. **Sem isso, qualquer publicação falha**,
+pelo terminal ou pelo GitHub.
+
+1. Abra <https://dash.cloudflare.com>
+2. Menu da esquerda → **Workers & Pages**
+3. Se aparecer a tela de boas-vindas, escolha um subdomínio (ex.: `wellington`)
+   e confirme — é o que vira `vagas.wellington.workers.dev`
+4. Se pedir para escolher um plano, escolha o **Free**
+
+Se você já vê uma lista (mesmo vazia) e um **Account ID** na direita, esse
+passo já está feito.
+
+---
+
 ## Passo 1 — Pegar o ID da sua conta Cloudflare
 
 1. Abra <https://dash.cloudflare.com>
@@ -86,6 +103,9 @@ qualquer alteração enviada ao branch republica sozinha.
 | `workers.api.error.not_authorized` ou erro de permissão ao criar | O token precisa poder **criar** um Worker, não só editar. Refaça o Passo 2 e, na tela do token, adicione a permissão **Account → Workers Scripts → Edit** |
 | `D1_ERROR: no such table` | O banco perdeu o esquema. Dá para recriar pela própria dashboard: **Workers & Pages → D1 → vagas → Console**, e colar o conteúdo de `services/worker/schema.sql` |
 | A aba **Actions** não aparece no GitHub | Vá em **Settings → Actions → General** e marque **Allow all actions** |
+| `code: 10015` / *not entitled to use Workers* | Faltou o **Passo 0**: entrar em Workers & Pages e escolher o subdomínio |
+| `code: 10007` / *workers.dev subdomain not found* | Mesmo caso: o subdomínio da conta ainda não foi escolhido |
+| `fetch failed` / `ETIMEDOUT` | Rede, firewall ou proxy. Tente de outra conexão (4G do celular serve) |
 
 ---
 
