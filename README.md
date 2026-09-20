@@ -135,6 +135,8 @@ risco de partida a frio descrito em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
   além do mapa de pontinhos verdes, e em que ordem
 - [`docs/NEGOCIO.md`](docs/NEGOCIO.md) — como isso vira receita, quanto custa
   servir um usuário, e o plano dos primeiros 90 dias
+- [`docs/ZONA-AZUL.md`](docs/ZONA-AZUL.md) — o que muda para vender o sistema
+  às prefeituras, e por onde entrar sem disputar licitação grande
 - [`docs/REVISAO-IDEIAS.md`](docs/REVISAO-IDEIAS.md) — avaliação de nove ideias
   de funcionalidade, com o que foi medido no simulador
 - [`docs/PUBLICAR.md`](docs/PUBLICAR.md) — como colocar o app no ar, com e sem
