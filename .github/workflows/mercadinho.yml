@@ -48,6 +48,15 @@ jobs:
           fi
           ./gradlew assembleDebug assembleRelease bundleRelease --console=plain --stacktrace
 
+      - name: Conferir que o app não usa internet
+        run: |
+          manifesto=$(find app/build/intermediates -path '*release*' -name AndroidManifest.xml | grep -i merged | head -1)
+          echo "Permissões do APK final ($manifesto):"
+          grep -o 'uses-permission[^>]*android:name="[^"]*"' "$manifesto" | sed 's/.*name=//'
+          if grep -q 'android.permission.INTERNET' "$manifesto"; then
+            echo "::error::Alguma biblioteca acrescentou a permissão de internet"; exit 1
+          fi
+
       - uses: actions/upload-artifact@v4
         with:
           name: mercadinho-apk

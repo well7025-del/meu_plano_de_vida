@@ -2,7 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Nenhuma permissão de internet: o app funciona e guarda tudo no celular. -->
+    <!-- Nenhuma permissão de internet: o app funciona e guarda tudo no celular.
+         A linha abaixo garante que nenhuma biblioteca a acrescente por tabela. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
