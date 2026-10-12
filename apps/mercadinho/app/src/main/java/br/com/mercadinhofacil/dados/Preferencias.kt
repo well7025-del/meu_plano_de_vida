@@ -76,6 +76,10 @@ class Preferencias(context: Context) {
     var tamanhoLetra: Float
         get() = sp.getFloat("tamanhoLetra", 1.1f)
         set(v) = editar { putFloat("tamanhoLetra", v) }
+    /** Usa a janela de voz do Google em vez do microfone dentro do app (celulares onde o outro não funciona). */
+    var vozPelaJanela: Boolean
+        get() = sp.getBoolean("vozPelaJanela", false)
+        set(v) = editar { putBoolean("vozPelaJanela", v) }
     var tutorialVisto: Boolean
         get() = sp.getBoolean("tutorialVisto", false)
         set(v) = editar { putBoolean("tutorialVisto", v) }

@@ -103,6 +103,14 @@ fun TelaAjustes(nav: Nav) {
                 Text("Responder falando", Modifier.weight(1f), fontSize = 18.sp)
                 Switch(falar, { falar = it; prefs.responderFalando = it })
             }
+            var janela by remember { mutableStateOf(prefs.vozPelaJanela) }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Usar a janela de voz do Google", fontSize = 18.sp)
+                    Text("Ligue se o microfone fecha antes de você falar", fontSize = 14.sp, color = MaterialTheme.colorScheme.outline)
+                }
+                Switch(janela, { janela = it; prefs.vozPelaJanela = it })
+            }
             var confirmar by remember { mutableStateOf(prefs.pedirConfirmacao) }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Pedir confirmação ao vender", Modifier.weight(1f), fontSize = 18.sp)
@@ -111,7 +119,7 @@ fun TelaAjustes(nav: Nav) {
             Text("Tamanho das letras", fontSize = 18.sp)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(1.0f to "Normal", 1.1f to "Grande", 1.25f to "Maior", 1.4f to "Enorme").forEach { (v, r) ->
-                    FilterChip(prefs.tamanhoLetra == v, { prefs.tamanhoLetra = v }, label = { Text(r, fontSize = 16.sp) })
+                    FilterChip(prefs.tamanhoLetra == v, { prefs.tamanhoLetra = v }, label = { Text(maxLines = 1, softWrap = false, text = r, fontSize = 16.sp) })
                 }
             }
             Secao("Sobre")
@@ -193,8 +201,8 @@ fun TelaImpressora(nav: Nav) {
             androidx.compose.material3.TextButton(onClick = { atualizar++ }) { Text("Atualizar lista") }
             Secao("Papel")
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(largura == 32, { largura = 32; prefs.larguraPapel = 32 }, label = { Text("58 mm (mais comum)", fontSize = 16.sp) })
-                FilterChip(largura == 48, { largura = 48; prefs.larguraPapel = 48 }, label = { Text("80 mm", fontSize = 16.sp) })
+                FilterChip(largura == 32, { largura = 32; prefs.larguraPapel = 32 }, label = { Text(maxLines = 1, softWrap = false, text = "58 mm (mais comum)", fontSize = 16.sp) })
+                FilterChip(largura == 48, { largura = 48; prefs.larguraPapel = 48 }, label = { Text(maxLines = 1, softWrap = false, text = "80 mm", fontSize = 16.sp) })
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Imprimir QR Code do Pix", Modifier.weight(1f), fontSize = 17.sp)

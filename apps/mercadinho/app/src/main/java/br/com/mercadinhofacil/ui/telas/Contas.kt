@@ -231,11 +231,11 @@ fun TelaLancamento(nav: Nav, tipo: String) {
             CampoDinheiro(valor, { valor = it }, "Valor")
             Campo(descricao, { descricao = it }, "Descrição")
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                sugestoes.forEach { s -> FilterChip(descricao == s, { descricao = s }, label = { Text(s, fontSize = 16.sp) }) }
+                sugestoes.forEach { s -> FilterChip(descricao == s, { descricao = s }, label = { Text(maxLines = 1, softWrap = false, text = s, fontSize = 16.sp) }) }
             }
             Text(if (entrada) "Entra em qual conta?" else "Sai de qual conta?", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                contas.forEach { c -> FilterChip(conta?.conta?.id == c.conta.id, { contaId = c.conta.id }, label = { Text("${c.conta.nome} (${Dinheiro.formatar(c.saldo)})", fontSize = 16.sp) }) }
+                contas.forEach { c -> FilterChip(conta?.conta?.id == c.conta.id, { contaId = c.conta.id }, label = { Text(maxLines = 1, softWrap = false, text = "${c.conta.nome} (${Dinheiro.formatar(c.saldo)})", fontSize = 16.sp) }) }
             }
             BotaoPrincipal("Lançar", cor = if (entrada) Verde else Vermelho) {
                 val v = Dinheiro.ler(valor)
@@ -280,11 +280,11 @@ fun TelaTransferencia(nav: Nav) {
             CampoDinheiro(valor, { valor = it }, "Valor")
             Text("Sai de:", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                contas.forEach { c -> FilterChip(origem == c.conta.id, { origem = c.conta.id }, label = { Text("${c.conta.nome} (${Dinheiro.formatar(c.saldo)})", fontSize = 16.sp) }) }
+                contas.forEach { c -> FilterChip(origem == c.conta.id, { origem = c.conta.id }, label = { Text(maxLines = 1, softWrap = false, text = "${c.conta.nome} (${Dinheiro.formatar(c.saldo)})", fontSize = 16.sp) }) }
             }
             Text("Vai para:", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                contas.filter { it.conta.id != origem }.forEach { c -> FilterChip(destino == c.conta.id, { destino = c.conta.id }, label = { Text(c.conta.nome, fontSize = 16.sp) }) }
+                contas.filter { it.conta.id != origem }.forEach { c -> FilterChip(destino == c.conta.id, { destino = c.conta.id }, label = { Text(maxLines = 1, softWrap = false, text = c.conta.nome, fontSize = 16.sp) }) }
             }
             Campo(obs, { obs = it }, "Observação (opcional)")
             BotaoPrincipal("Transferir", Icons.Filled.SwapHoriz) {

@@ -81,7 +81,7 @@ fun TelaRelatorios(nav: Nav) {
         Coluna(padding) {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(Periodo.HOJE to "Hoje", Periodo.ONTEM to "Ontem", Periodo.SEMANA to "Semana", Periodo.MES to "Mês", Periodo.MES_PASSADO to "Mês passado").forEach { (p, rotulo) ->
-                    FilterChip(periodo == p, { periodo = p }, label = { Text(rotulo, fontSize = 17.sp) })
+                    FilterChip(periodo == p, { periodo = p }, label = { Text(maxLines = 1, softWrap = false, text = rotulo, fontSize = 17.sp) })
                 }
             }
             val r = resultado

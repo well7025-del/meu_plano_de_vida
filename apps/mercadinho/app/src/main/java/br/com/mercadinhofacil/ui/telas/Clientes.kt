@@ -99,7 +99,7 @@ fun TelaClientes(nav: Nav) {
             }
             Column(Modifier.padding(horizontal = 12.dp)) {
                 Campo(busca, { busca = it }, "Buscar cliente", fim = { Icon(Icons.Filled.Search, null) })
-                FilterChip(soDevendo, { soDevendo = !soDevendo }, label = { Text("Só quem deve") })
+                FilterChip(soDevendo, { soDevendo = !soDevendo }, label = { Text(maxLines = 1, softWrap = false, text = "Só quem deve") })
             }
             val filtrados = lista.filter {
                 (!soDevendo || it.divida > 0) && (busca.isBlank() || Texto.normalizar(it.cliente.nome).contains(Texto.normalizar(busca)))

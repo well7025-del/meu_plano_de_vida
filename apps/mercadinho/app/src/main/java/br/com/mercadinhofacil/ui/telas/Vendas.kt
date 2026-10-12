@@ -1,5 +1,9 @@
 package br.com.mercadinhofacil.ui.telas
 
+import androidx.compose.foundation.rememberScrollState
+
+import androidx.compose.foundation.horizontalScroll
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -101,7 +105,7 @@ fun TelaComprovante(nav: Nav, vendaId: Long) {
         Coluna(padding) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(v.data.dataHora(), Modifier.weight(1f), fontSize = 17.sp)
-                AssistChip(onClick = {}, label = { Text(Documentos.situacao(v.status), fontWeight = FontWeight.Bold, color = corStatus(v.status)) })
+                AssistChip(onClick = {}, label = { Text(maxLines = 1, softWrap = false, text = Documentos.situacao(v.status), fontWeight = FontWeight.Bold, color = corStatus(v.status)) })
             }
             if (v.status == StatusVenda.PENDENTE) {
                 val codigo = dados.pixCopiaECola
@@ -228,9 +232,9 @@ fun TelaVendas(nav: Nav) {
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(null to "Todas", StatusVenda.PENDENTE to "Pix pendente", StatusVenda.FIADO to "Fiado", StatusVenda.CANCELADA to "Canceladas").forEach { (s, rotulo) ->
-                    FilterChip(filtro == s, { filtro = s }, label = { Text(rotulo) })
+                    FilterChip(filtro == s, { filtro = s }, label = { Text(maxLines = 1, softWrap = false, text = rotulo) })
                 }
             }
             val filtradas = lista.filter { filtro == null || it.venda.status == filtro }

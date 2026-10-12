@@ -1,6 +1,9 @@
 package br.com.mercadinhofacil.ui.telas
 
 import android.Manifest
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.speech.RecognizerIntent
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -71,6 +74,7 @@ import br.com.mercadinhofacil.ui.Tela
 import br.com.mercadinhofacil.ui.Vermelho
 import br.com.mercadinhofacil.voz.Assistente
 import br.com.mercadinhofacil.voz.Ouvinte
+import br.com.mercadinhofacil.voz.intencaoDeVoz
 import br.com.mercadinhofacil.voz.Resposta
 import kotlinx.coroutines.launch
 
@@ -95,6 +99,11 @@ fun TelaVoz(nav: Nav) {
 
     DisposableEffect(Unit) { onDispose { ouvinte.parar(); app.falante.calar() } }
     LaunchedEffect(conversa.size, proposta) { if (conversa.isNotEmpty()) lista.animateScrollToItem(conversa.size - 1) }
+
+    fun avisar(texto: String) {
+        if (conversa.lastOrNull()?.texto == texto) conversa.removeAt(conversa.lastIndex)
+        conversa += Fala(false, texto)
+    }
 
     fun responder(texto: String) {
         app.falante.calar()
@@ -122,24 +131,56 @@ fun TelaVoz(nav: Nav) {
         }
     }
 
+    fun aoOuvir(texto: String) {
+        ouvindo = false
+        parcial = ""
+        enviar(texto)
+    }
+
+    // Janela de voz do Google: funciona nos celulares em que o microfone dentro do app fecha sozinho.
+    val janela = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        ouvindo = false
+        val texto = r.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+        if (r.resultCode == Activity.RESULT_OK && !texto.isNullOrBlank()) aoOuvir(texto)
+        else avisar("Não ouvi nada. Toque no microfone e fale de novo.")
+    }
+
+    fun abrirJanela(): Boolean = try {
+        ouvindo = true
+        janela.launch(intencaoDeVoz(comTela = true))
+        true
+    } catch (e: ActivityNotFoundException) {
+        ouvindo = false
+        false
+    }
+
     fun ouvir() {
         app.falante.calar()
+        if (app.prefs.vozPelaJanela && abrirJanela()) return
         if (!ouvinte.disponivel()) {
-            conversa += Fala(false, "Este celular não tem reconhecimento de voz. Digite o comando na caixa abaixo.")
+            if (!abrirJanela()) avisar("Este celular não tem reconhecimento de voz. Digite o comando na caixa abaixo.")
             return
         }
         ouvindo = true
         parcial = ""
         ouvinte.ouvir(
             aoParcial = { parcial = it },
-            aoTerminar = { ouvindo = false; parcial = ""; enviar(it) },
-            aoErro = { ouvindo = false; parcial = ""; conversa += Fala(false, it) },
+            aoTerminar = { aoOuvir(it) },
+            aoFalhar = { mensagem, usarJanela ->
+                ouvindo = false
+                parcial = ""
+                if (usarJanela) {
+                    // Passa a usar a janela do Google daqui para frente neste celular.
+                    app.prefs.vozPelaJanela = true
+                    if (!abrirJanela()) avisar("O reconhecimento de voz não funcionou neste celular. Digite o comando na caixa abaixo.")
+                } else avisar(mensagem)
+            },
             aoNivel = { nivel = it },
         )
     }
 
     val permissao = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
-        if (ok) ouvir() else conversa += Fala(false, "Sem permissão do microfone não consigo ouvir. Você pode digitar o comando.")
+        if (ok) ouvir() else avisar("Sem permissão do microfone não consigo ouvir. Você pode digitar o comando.")
     }
 
     fun tocarMicrofone() {

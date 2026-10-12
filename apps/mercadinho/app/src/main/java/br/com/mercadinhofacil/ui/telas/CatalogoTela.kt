@@ -1,5 +1,9 @@
 package br.com.mercadinhofacil.ui.telas
 
+import androidx.compose.foundation.rememberScrollState
+
+import androidx.compose.foundation.horizontalScroll
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -101,9 +105,9 @@ fun TelaCatalogo(nav: Nav) {
             Secao("Produtos (${escolhidos.size})")
             val categorias = lista.map { it.categoria }.filter { it.isNotBlank() }.distinct().sorted()
             if (categorias.isNotEmpty()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
-                    FilterChip(categoria == null, { categoria = null }, label = { Text("Todas") })
-                    categorias.take(4).forEach { c -> FilterChip(categoria == c, { categoria = c }, label = { Text(c) }) }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+                    FilterChip(categoria == null, { categoria = null }, label = { Text(maxLines = 1, softWrap = false, text = "Todas") })
+                    categorias.forEach { c -> FilterChip(categoria == c, { categoria = c }, label = { Text(maxLines = 1, softWrap = false, text = c) }) }
                 }
             }
             Row {

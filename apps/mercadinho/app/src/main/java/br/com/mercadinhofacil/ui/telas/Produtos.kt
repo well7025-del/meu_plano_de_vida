@@ -1,5 +1,9 @@
 package br.com.mercadinhofacil.ui.telas
 
+import androidx.compose.foundation.rememberScrollState
+
+import androidx.compose.foundation.horizontalScroll
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -141,7 +145,7 @@ fun TelaProdutos(nav: Nav) {
                 Campo(busca, { busca = it }, "Buscar", fim = { Icon(Icons.Filled.Search, null) })
                 Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     val baixos = lista.count { it.estoqueMinimo > 0 && it.estoque <= it.estoqueMinimo || it.estoque <= 0 }
-                    FilterChip(soBaixos, { soBaixos = !soBaixos }, label = { Text("Acabando ($baixos)") }, leadingIcon = { Icon(Icons.Filled.Warning, null) })
+                    FilterChip(soBaixos, { soBaixos = !soBaixos }, label = { Text(maxLines = 1, softWrap = false, text = "Acabando ($baixos)") }, leadingIcon = { Icon(Icons.Filled.Warning, null) })
                     Text("${lista.size} produtos", Modifier.weight(1f), fontSize = 15.sp)
                 }
             }
@@ -318,8 +322,8 @@ fun TelaProduto(nav: Nav, produtoId: Long) {
             }
             Campo(categoria, { categoria = it }, "Categoria", dica = "ex.: Mercearia, Bebidas, Limpeza")
             if (categorias.isNotEmpty()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
-                    categorias.take(4).forEach { c -> FilterChip(categoria == c, { categoria = c }, label = { Text(c) }) }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+                    categorias.forEach { c -> FilterChip(categoria == c, { categoria = c }, label = { Text(maxLines = 1, softWrap = false, text = c) }) }
                 }
             }
             Campo(descricao, { descricao = it }, "Descrição (aparece no catálogo)", linhas = 2)
@@ -391,8 +395,8 @@ fun TelaEstoque(nav: Nav, produtoId: Long) {
                     Switch(pago, { pago = it })
                 }
                 if (pago) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        contas.forEach { c -> FilterChip((contaId ?: contas.firstOrNull()?.conta?.id) == c.conta.id, { contaId = c.conta.id }, label = { Text(c.conta.nome) }) }
+                    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        contas.forEach { c -> FilterChip((contaId ?: contas.firstOrNull()?.conta?.id) == c.conta.id, { contaId = c.conta.id }, label = { Text(maxLines = 1, softWrap = false, text = c.conta.nome) }) }
                     }
                 }
             } else {

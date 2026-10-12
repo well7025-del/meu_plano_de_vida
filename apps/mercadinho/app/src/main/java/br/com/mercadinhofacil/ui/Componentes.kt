@@ -199,7 +199,7 @@ fun Campo(
     OutlinedTextField(
         value = valor,
         onValueChange = aoMudar,
-        label = { Text(rotulo) },
+        label = { Text(maxLines = 1, softWrap = false, text = rotulo) },
         modifier = modifier.fillMaxWidth(),
         singleLine = linhas == 1,
         minLines = linhas,
@@ -239,7 +239,7 @@ fun SeletorForma(forma: FormaPagamento?, aoEscolher: (FormaPagamento) -> Unit, p
             FilterChip(
                 selected = f == forma,
                 onClick = { aoEscolher(f) },
-                label = { Text(f.rotulo, fontSize = 18.sp, modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp)) },
+                label = { Text(maxLines = 1, softWrap = false, text = f.rotulo, fontSize = 18.sp, modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp)) },
             )
         }
     }
@@ -294,7 +294,7 @@ val Unidades = listOf("un" to "Unidade", "kg" to "Quilo (kg)", "l" to "Litro", "
 fun SeletorUnidade(unidade: String, aoEscolher: (String) -> Unit) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Unidades.forEach { (u, rotulo) ->
-            FilterChip(selected = u == unidade, onClick = { aoEscolher(u) }, label = { Text(rotulo, fontSize = 16.sp) })
+            FilterChip(selected = u == unidade, onClick = { aoEscolher(u) }, label = { Text(maxLines = 1, softWrap = false, text = rotulo, fontSize = 16.sp) })
         }
     }
 }

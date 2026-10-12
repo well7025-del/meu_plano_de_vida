@@ -114,7 +114,7 @@ fun TelaPix(nav: Nav) {
                 Campo(banco, { banco = it }, "Banco / instituição", dica = "ex.: Nubank, Caixa, Mercado Pago")
                 Text("Tipo de chave:", fontSize = 17.sp)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    TipoChave.entries.forEach { t -> FilterChip(tipo == t, { tipo = t }, label = { Text(t.rotulo, fontSize = 16.sp) }) }
+                    TipoChave.entries.forEach { t -> FilterChip(tipo == t, { tipo = t }, label = { Text(maxLines = 1, softWrap = false, text = t.rotulo, fontSize = 16.sp) }) }
                 }
                 Campo(chave, { chave = it; if (it.length > 5) tipo = Pix.detectarTipo(it) }, "Chave Pix")
                 val chaveOk = chave.isBlank() || Pix.normalizarChave(chave, tipo) != null
