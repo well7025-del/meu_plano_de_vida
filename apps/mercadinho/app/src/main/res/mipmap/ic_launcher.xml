@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícone para Android 7 (antes dos ícones adaptativos) -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_launcher_fundo" />
+    <item android:drawable="@drawable/ic_launcher_frente" />
+</layer-list>
