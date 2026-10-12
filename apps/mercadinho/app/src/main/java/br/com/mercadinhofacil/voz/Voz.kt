@@ -13,12 +13,18 @@ import android.speech.tts.TextToSpeech
 import br.com.mercadinhofacil.core.Dinheiro
 import java.util.Locale
 
-/** Pedido de reconhecimento em português, preferindo o modo sem internet. */
-fun intencaoDeVoz(comTela: Boolean): Intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+/**
+ * Pedido de reconhecimento em português.
+ *
+ * @param soOffline pede o modo sem internet. Em celulares sem o pacote de
+ * português offline baixado, esse pedido falha na hora ("pesquisa por voz não
+ * disponível"); por isso só é usado na primeira tentativa.
+ */
+fun intencaoDeVoz(comTela: Boolean, soOffline: Boolean = false): Intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
     putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
     putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt-BR")
     putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "pt-BR")
-    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+    if (soOffline) putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
     putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
     // Dá tempo para a pessoa pensar antes de falar e no meio da frase.
     putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 3000L)
@@ -38,6 +44,12 @@ fun intencaoDeVoz(comTela: Boolean): Intent = Intent(RecognizerIntent.ACTION_REC
  * [aoFalhar] para a tela usar a janela de voz do Google.
  */
 class Ouvinte(private val context: Context) {
+
+    private companion object {
+        // SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED / ERROR_LANGUAGE_UNAVAILABLE (Android 12+)
+        const val ERRO_IDIOMA_NAO_SUPORTADO = 12
+        const val ERRO_IDIOMA_INDISPONIVEL = 13
+    }
 
     private var reconhecedor: SpeechRecognizer? = null
     private val principal = Handler(Looper.getMainLooper())
@@ -110,7 +122,12 @@ class Ouvinte(private val context: Context) {
                     SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT,
                     SpeechRecognizer.ERROR_CLIENT, SpeechRecognizer.ERROR_RECOGNIZER_BUSY,
                 )
-                if (erroPrecoce && tentativa < 3) {
+                // A primeira tentativa pede o modo sem internet. Se o celular não tem o
+                // pacote de português offline, ela falha (às vezes com "idioma
+                // indisponível", às vezes com "não entendi" instantâneo): tenta de novo
+                // no modo normal.
+                val semPacoteOffline = tentativa == 1 && !falou && (erroPrecoce || error in setOf(ERRO_IDIOMA_NAO_SUPORTADO, ERRO_IDIOMA_INDISPONIVEL))
+                if (semPacoteOffline || (erroPrecoce && tentativa < 3)) {
                     parar()
                     principal.postDelayed({ iniciar(aoParcial, aoTerminar, aoFalhar, aoNivel, tentativa + 1) }, 350)
                     return
@@ -132,7 +149,7 @@ class Ouvinte(private val context: Context) {
             }
         })
         try {
-            r.startListening(intencaoDeVoz(comTela = false))
+            r.startListening(intencaoDeVoz(comTela = false, soOffline = tentativa == 1))
         } catch (e: Exception) {
             parar()
             aoFalhar("O reconhecimento de voz deste celular não abriu.", true)

@@ -26,11 +26,13 @@ guardado só no celular. Sem servidor, sem conta e sem mensalidade.
   dados SQLite, fotos e configurações ficam no armazenamento do app.
 - O backup do Google Drive automático está desligado de propósito; o backup é
   feito pelo próprio app, num arquivo que o comerciante controla.
-- Voz: usa o reconhecimento do próprio Android pedindo o modo no aparelho.
-  No Android 12+ com reconhecimento local disponível, nada sai do celular. Em
-  aparelhos mais antigos, o comerciante deve baixar o pacote offline de
-  "Português (Brasil)" (Configurações do Google > Voz > Reconhecimento
-  offline); sem ele, o Android pode usar a internet para transcrever a fala.
+- Voz: usa o reconhecimento de fala do próprio Android. A primeira tentativa
+  pede o modo sem internet; se o celular não tiver o pacote de português
+  offline (comum em aparelhos novos de fábrica, como vários Xiaomi), o app
+  usa o reconhecimento normal, que manda o áudio para o Google transcrever.
+  Para a voz funcionar 100% offline, baixe o pacote "Português (Brasil)" em
+  Configurações > Google > Voz (ou no app Google > Configurações > Voz >
+  Reconhecimento de fala offline).
 - A "inteligência" (entender a frase, achar o produto mesmo com erro,
   analisar o negócio) é feita por regras no próprio app, sem enviar dados.
 - O código de barras é lido pelo ML Kit com modelo embutido no APK.
