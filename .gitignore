@@ -7,3 +7,10 @@ dist/
 .DS_Store
 .wrangler/
 services/worker/public/
+.gradle/
+build/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
