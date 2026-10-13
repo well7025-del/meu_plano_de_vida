@@ -9,6 +9,7 @@ import br.com.mercadinhofacil.voz.Assistente
 import br.com.mercadinhofacil.voz.Falante
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 /** Guarda as peças do app. Tudo local: banco SQLite, preferências e arquivos no celular. */
@@ -23,6 +24,9 @@ class MercadinhoApp : Application() {
     val assistente by lazy { Assistente(this) }
     val falante by lazy { Falante(this) }
     val escopo = CoroutineScope(SupervisorJob())
+
+    /** Mensagem de limite da versão de teste a mostrar na tela (null = nenhuma). */
+    val limiteAtingido = MutableStateFlow<String?>(null)
 
     override fun onCreate() {
         super.onCreate()

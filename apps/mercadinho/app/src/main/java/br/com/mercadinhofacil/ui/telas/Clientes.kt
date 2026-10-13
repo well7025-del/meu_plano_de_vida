@@ -64,6 +64,7 @@ import br.com.mercadinhofacil.ui.Vazio
 import br.com.mercadinhofacil.ui.Verde
 import br.com.mercadinhofacil.ui.Vermelho
 import br.com.mercadinhofacil.ui.aviso
+import br.com.mercadinhofacil.ui.tratarErro
 import br.com.mercadinhofacil.ui.data
 import br.com.mercadinhofacil.ui.dataHora
 import kotlinx.coroutines.launch
@@ -130,7 +131,13 @@ fun TelaClientes(nav: Nav) {
     if (novo) {
         DialogoNovoCliente(busca, aoFechar = { novo = false }) { nome, telefone ->
             novo = false
-            escopo.launch { app.repositorio.salvarCliente(Cliente(nome = nome, telefone = telefone)); aviso(context, "$nome cadastrado") }
+            escopo.launch {
+                try {
+                    app.repositorio.salvarCliente(Cliente(nome = nome, telefone = telefone)); aviso(context, "$nome cadastrado")
+                } catch (e: Exception) {
+                    app.tratarErro(context, e)
+                }
+            }
         }
     }
 }

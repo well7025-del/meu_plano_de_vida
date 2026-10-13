@@ -90,6 +90,7 @@ class Repositorio(private val banco: BancoDados) {
         pixPendente: Boolean = false,
     ): Long = banco.withTransaction {
         require(itens.isNotEmpty()) { "A venda está vazia" }
+        if (VersaoTeste.ativa && dao.contarVendas() >= VersaoTeste.vendas) throw LimiteDoTeste(VersaoTeste.mensagemVendas())
         require(forma != FormaPagamento.FIADO || clienteId != null) { "Fiado precisa de um cliente" }
         val subtotal = itens.sumOf { it.total }
         val descontoReal = desconto.coerceIn(0, subtotal)
@@ -250,6 +251,7 @@ class Repositorio(private val banco: BancoDados) {
 
     suspend fun salvarProduto(p: Produto): Long = banco.withTransaction {
         if (p.id == 0L) {
+            if (VersaoTeste.ativa && dao.contarProdutos() >= VersaoTeste.produtos) throw LimiteDoTeste(VersaoTeste.mensagemProdutos())
             val id = dao.inserir(p)
             if (p.estoque != 0.0) dao.inserir(MovimentoEstoque(produtoId = id, quantidade = p.estoque, tipo = TipoEstoque.AJUSTE, custoUnitario = p.custo, observacao = "Estoque inicial"))
             registrar("Produto cadastrado", "${p.nome}: ${Dinheiro.formatar(p.preco)}")
@@ -302,6 +304,7 @@ class Repositorio(private val banco: BancoDados) {
     }
 
     suspend fun salvarCliente(c: Cliente): Long = if (c.id == 0L) {
+        if (VersaoTeste.ativa && dao.contarClientes() >= VersaoTeste.clientes) throw LimiteDoTeste(VersaoTeste.mensagemClientes())
         val id = dao.inserir(c); registrar("Cliente cadastrado", c.nome); id
     } else {
         dao.atualizar(c); registrar(if (c.ativo) "Cliente alterado" else "Cliente removido", c.nome); c.id

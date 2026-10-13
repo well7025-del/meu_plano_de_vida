@@ -204,6 +204,26 @@ interface MercadinhoDao {
     @Query("SELECT * FROM fechamentos WHERE contaId = :contaId ORDER BY data DESC LIMIT 30")
     fun fechamentos(contaId: Long): Flow<List<Fechamento>>
 
+    // ---------------------------------------------------------------- contagens (versão de teste)
+
+    @Query("SELECT COUNT(*) FROM produtos WHERE ativo = 1")
+    suspend fun contarProdutos(): Int
+
+    @Query("SELECT COUNT(*) FROM clientes WHERE ativo = 1")
+    suspend fun contarClientes(): Int
+
+    @Query("SELECT COUNT(*) FROM vendas")
+    suspend fun contarVendas(): Int
+
+    @Query("SELECT COUNT(*) FROM produtos WHERE ativo = 1")
+    fun observarQuantidadeProdutos(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM clientes WHERE ativo = 1")
+    fun observarQuantidadeClientes(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM vendas")
+    fun observarQuantidadeVendas(): Flow<Int>
+
     // ---------------------------------------------------------------- histórico
 
     @Insert

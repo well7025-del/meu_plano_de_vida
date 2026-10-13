@@ -124,6 +124,14 @@ fun TelaAjustes(nav: Nav) {
             }
             Secao("Sobre")
             Text("Mercadinho Fácil ${BuildConfig.VERSION_NAME}", fontSize = 16.sp)
+            if (br.com.mercadinhofacil.dados.VersaoTeste.ativa) {
+                val context = LocalContext.current
+                Text(
+                    "Versão de teste: até ${br.com.mercadinhofacil.dados.VersaoTeste.produtos} produtos, ${br.com.mercadinhofacil.dados.VersaoTeste.clientes} clientes e ${br.com.mercadinhofacil.dados.VersaoTeste.vendas} vendas.",
+                    fontSize = 15.sp,
+                )
+                BotaoPrincipal("Comprar a versão completa") { br.com.mercadinhofacil.ui.abrirCompra(context) }
+            }
             Text(
                 "Todos os dados ficam só neste celular: não há servidor, conta ou mensalidade. Faça backup com frequência e guarde uma cópia fora do celular.",
                 fontSize = 15.sp, color = MaterialTheme.colorScheme.outline,
@@ -283,6 +291,13 @@ fun TelaBackup(nav: Nav) {
             Text("Guarda os 10 últimos no celular." + if (prefs.backupPasta.isNotBlank()) " Também copia para a pasta escolhida." else "", fontSize = 15.sp)
             BotaoSecundario(if (prefs.backupPasta.isBlank()) "Escolher pasta extra (cartão de memória, pendrive…)" else "Trocar a pasta extra", Icons.Filled.FolderOpen) { escolherPasta.launch(null) }
 
+            if (br.com.mercadinhofacil.dados.VersaoTeste.ativa) {
+                Secao("Levar para a versão completa")
+                Text(
+                    "Faça um backup aqui e envie para você mesmo. Depois de instalar a versão completa, vá em Ajustes > Backup > \"Restaurar de um arquivo\" e escolha esse backup: tudo que você cadastrou no teste continua lá.",
+                    fontSize = 15.sp,
+                )
+            } else {
             Secao("Restaurar")
             Text("Substitui TODOS os dados atuais pelos do backup. Antes, o app guarda uma cópia do que existe agora.", fontSize = 15.sp, color = Vermelho)
             BotaoSecundario("Restaurar de um arquivo", Icons.Filled.Restore) { abrir.launch(arrayOf("application/zip", "application/octet-stream", "*/*")) }
@@ -295,6 +310,7 @@ fun TelaBackup(nav: Nav) {
                     }
                     HorizontalDivider()
                 }
+            }
             }
         }
     }

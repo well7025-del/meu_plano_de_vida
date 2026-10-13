@@ -72,6 +72,7 @@ import br.com.mercadinhofacil.ui.Tela
 import br.com.mercadinhofacil.ui.Vazio
 import br.com.mercadinhofacil.ui.Vermelho
 import br.com.mercadinhofacil.ui.aviso
+import br.com.mercadinhofacil.ui.tratarErro
 import kotlinx.coroutines.launch
 
 /** Busca simples por nome, apelido ou código; tolera erro de digitação. */
@@ -135,7 +136,7 @@ fun TelaVender(nav: Nav) {
                     pagando = false
                     nav.trocar("comprovante/$id")
                 } catch (e: Exception) {
-                    aviso(context, e.message ?: "Não consegui salvar a venda")
+                    app.tratarErro(context, e)
                 }
             }
         }
@@ -422,9 +423,13 @@ private fun TelaPagamento(
         DialogoNovoCliente(buscaCliente.trim(), aoFechar = { novoCliente = false }) { nome, telefone ->
             novoCliente = false
             escopo.launch {
-                clienteId = app.repositorio.salvarCliente(Cliente(nome = nome, telefone = telefone))
-                buscaCliente = ""
-                aviso(context, "$nome cadastrado")
+                try {
+                    clienteId = app.repositorio.salvarCliente(Cliente(nome = nome, telefone = telefone))
+                    buscaCliente = ""
+                    aviso(context, "$nome cadastrado")
+                } catch (e: Exception) {
+                    app.tratarErro(context, e)
+                }
             }
         }
     }

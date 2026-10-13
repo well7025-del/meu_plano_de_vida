@@ -94,6 +94,7 @@ import br.com.mercadinhofacil.ui.Tela
 import br.com.mercadinhofacil.ui.Vazio
 import br.com.mercadinhofacil.ui.Vermelho
 import br.com.mercadinhofacil.ui.aviso
+import br.com.mercadinhofacil.ui.tratarErro
 import br.com.mercadinhofacil.ui.dataHora
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -269,9 +270,13 @@ fun TelaProduto(nav: Nav, produtoId: Long) {
         escopo.launch {
             val repetido = p.codigoBarras?.let { app.repositorio.dao.produtoPorCodigo(it) }
             if (repetido != null && repetido.id != p.id) { aviso(context, "Esse código já é do produto ${repetido.nome}"); return@launch }
-            app.repositorio.salvarProduto(p)
-            aviso(context, "Produto salvo")
-            nav.voltar()
+            try {
+                app.repositorio.salvarProduto(p)
+                aviso(context, "Produto salvo")
+                nav.voltar()
+            } catch (e: Exception) {
+                app.tratarErro(context, e)
+            }
         }
     }
 

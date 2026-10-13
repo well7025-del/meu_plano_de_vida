@@ -54,6 +54,11 @@ import br.com.mercadinhofacil.ui.Roxo
 import br.com.mercadinhofacil.ui.Tela
 import br.com.mercadinhofacil.ui.Verde
 import br.com.mercadinhofacil.ui.Vermelho
+import br.com.mercadinhofacil.dados.VersaoTeste
+import br.com.mercadinhofacil.ui.abrirCompra
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.platform.LocalContext
 import java.time.LocalDate
 
 @Composable
@@ -92,6 +97,8 @@ fun TelaInicio(nav: Nav) {
                     }
                 }
             }
+
+            if (VersaoTeste.ativa) FaixaVersaoTeste()
 
             Card(
                 onClick = { nav.ir("vendas") },
@@ -144,6 +151,36 @@ fun TelaInicio(nav: Nav) {
                     if (linha.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
+        }
+    }
+}
+
+/** Mostra quanto do teste já foi usado e o botão de compra. */
+@Composable
+private fun FaixaVersaoTeste() {
+    val app = LocalApp.current
+    val context = LocalContext.current
+    val dao = app.repositorio.dao
+    val produtos by remember { dao.observarQuantidadeProdutos() }.collectAsState(0)
+    val clientes by remember { dao.observarQuantidadeClientes() }.collectAsState(0)
+    val vendas by remember { dao.observarQuantidadeVendas() }.collectAsState(0)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0), contentColor = Color(0xFF4E342E)),
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text("Versão de teste", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "Produtos: $produtos de ${VersaoTeste.produtos} · Clientes: $clientes de ${VersaoTeste.clientes} · Vendas: $vendas de ${VersaoTeste.vendas}",
+                fontSize = 16.sp,
+            )
+            Text("Todas as funções liberadas. Gostou? A versão completa não tem limite.", fontSize = 15.sp)
+            Spacer(Modifier.size(8.dp))
+            Button(
+                onClick = { abrirCompra(context) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Laranja),
+            ) { Text("Comprar a versão completa", fontSize = 18.sp, fontWeight = FontWeight.Bold) }
         }
     }
 }

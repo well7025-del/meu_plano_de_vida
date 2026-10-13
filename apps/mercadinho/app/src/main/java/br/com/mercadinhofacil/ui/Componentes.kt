@@ -60,6 +60,21 @@ val LocalApp = staticCompositionLocalOf<MercadinhoApp> { error("App não dispon�
 
 fun aviso(context: Context, texto: String) = Toast.makeText(context, texto, Toast.LENGTH_LONG).show()
 
+/** Mostra o erro de uma operação; limite da versão de teste vira a janela de compra. */
+fun MercadinhoApp.tratarErro(context: Context, e: Throwable) {
+    if (e is br.com.mercadinhofacil.dados.LimiteDoTeste) limiteAtingido.value = e.message
+    else aviso(context, e.message ?: "Não deu certo")
+}
+
+fun abrirCompra(context: Context) {
+    runCatching {
+        context.startActivity(
+            android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(br.com.mercadinhofacil.dados.VersaoTeste.linkCompra))
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+    }.onFailure { aviso(context, "Não consegui abrir o link de compra.") }
+}
+
 private val formatoDataHora = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale("pt", "BR"))
 private val formatoData = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
 private val formatoHora = SimpleDateFormat("HH:mm", Locale("pt", "BR"))

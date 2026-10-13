@@ -58,7 +58,49 @@ Se quiser os dois canais, publique na Play Store e use a Hotmart/Kiwify
 para vender um **pacote com treinamento** (vídeo ensinando a usar) que
 inclui o link da Play Store.
 
-## 3. Preço e posicionamento
+## 3. Versão de teste (para o cliente experimentar antes de pagar)
+
+O mesmo código gera duas versões. O build do GitHub publica cada uma num
+artefato separado:
+
+| | Versão de teste | Versão completa |
+|---|---|---|
+| Artefato do Actions | `mercadinho-teste` | `mercadinho-completo` |
+| Nome no celular | Mercadinho Fácil Teste (ícone laranja) | Mercadinho Fácil (ícone verde) |
+| Pacote | `br.com.mercadinhofacil.teste` | `br.com.mercadinhofacil` |
+| Limites | 15 produtos, 5 clientes, 50 vendas | nenhum |
+| Funções | todas (voz, Pix, impressão, catálogo, relatórios, dicas, backup) | todas |
+
+- Ao bater um limite, aparece a janela **"Limite da versão de teste"** com
+  o botão **Comprar a versão completa**. Na tela inicial, uma faixa mostra
+  quanto já foi usado ("Produtos: 8 de 15…") com o mesmo botão.
+- O limite de vendas conta também as canceladas, para não dar para
+  "renovar" o teste cancelando vendas.
+- As duas versões podem ficar instaladas juntas. Para **levar os dados do
+  teste para a completa**: no teste, Ajustes > Backup > "Enviar o último
+  backup"; na completa, Ajustes > Backup > "Restaurar de um arquivo". A
+  versão de teste não restaura backups (senão daria para furar o limite).
+- **Link do botão de compra**: cadastre no GitHub em Settings > Secrets and
+  variables > Actions > aba *Variables* > `MERCADINHO_LINK_COMPRA` (por
+  exemplo o link da Play Store, da Hotmart/Kiwify ou `https://wa.me/55DDDNUMERO`).
+  Sem a variável, o botão abre a página da versão completa na Play Store.
+- Os limites ficam em `apps/mercadinho/app/build.gradle.kts`, no bloco
+  `create("teste")` (`LIMITE_PRODUTOS`, `LIMITE_CLIENTES`, `LIMITE_VENDAS`).
+
+**Como distribuir o teste**
+
+- **Play Store** (recomendado): publique o `.aab` do teste como um app
+  **gratuito** separado ("Mercadinho Fácil Teste") e a versão completa como
+  app pago. O cliente instala o grátis e, quando gostar, compra o pago.
+- **Direto pelo WhatsApp/site**: mande o arquivo
+  `mercadinho-facil-TESTE.apk`. O cliente precisa autorizar "instalar apps
+  desconhecidos" no celular.
+
+Atenção honesta: num APK que circula livremente, alguém com conhecimento
+técnico consegue desmontar e tirar o limite. Para o público deste app isso é
+raro; a proteção de verdade da versão completa é vendê-la pela Play Store.
+
+## 4. Preço e posicionamento
 
 Referências do mercado brasileiro (apps de gestão para pequeno comércio):
 os concorrentes populares cobram **mensalidade** de R$ 30 a R$ 90 e exigem
@@ -72,7 +114,7 @@ internet e cadastro. O argumento de venda deste app é o oposto:
 Faixas que fazem sentido: R$ 49,90 a R$ 129,90 pagamento único. Um teste
 simples: começar mais alto, oferecer cupom de lançamento e medir.
 
-## 4. O que dizer com honestidade ao vender
+## 5. O que dizer com honestidade ao vender
 
 - O comprovante é **sem valor fiscal** (está impresso nele). O app não emite
   NFC-e/cupom fiscal; quem é obrigado a emitir nota precisa de um emissor à
@@ -87,7 +129,7 @@ simples: começar mais alto, oferecer cupom de lançamento e medir.
   O app faz backup diário automático no celular e lembra de tirar uma cópia
   para fora dele.
 
-## 5. Antes de lançar — testar com 3 a 5 mercearias reais
+## 6. Antes de lançar — testar com 3 a 5 mercearias reais
 
 1. Instalar o APK de teste (artefato `mercadinho-apk`, arquivo `app-debug.apk`).
 2. Cadastrar 20 produtos que mais saem e usar 1 semana.

@@ -15,10 +15,41 @@ android {
         applicationId = "br.com.mercadinhofacil"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.1.0"
         vectorDrawables.useSupportLibrary = true
     }
+
+    // Duas versões do mesmo código:
+    //  - completo: a que o cliente compra, sem limites.
+    //  - teste: instala ao lado da completa (outro applicationId), com
+    //    cadastros limitados, para o cliente experimentar antes de pagar.
+    flavorDimensions += "versao"
+    productFlavors {
+        create("completo") {
+            dimension = "versao"
+            resValue("string", "app_name", "Mercadinho Fácil")
+            buildConfigField("boolean", "TESTE", "false")
+            buildConfigField("int", "LIMITE_PRODUTOS", "0")
+            buildConfigField("int", "LIMITE_CLIENTES", "0")
+            buildConfigField("int", "LIMITE_VENDAS", "0")
+        }
+        create("teste") {
+            dimension = "versao"
+            applicationIdSuffix = ".teste"
+            versionNameSuffix = "-teste"
+            resValue("string", "app_name", "Mercadinho Fácil Teste")
+            buildConfigField("boolean", "TESTE", "true")
+            buildConfigField("int", "LIMITE_PRODUTOS", "15")
+            buildConfigField("int", "LIMITE_CLIENTES", "5")
+            buildConfigField("int", "LIMITE_VENDAS", "50")
+        }
+    }
+    // Onde o cliente compra a versão completa (troque pelo seu link: Play Store, Hotmart, WhatsApp...).
+    defaultConfig.buildConfigField(
+        "String", "LINK_COMPRA",
+        "\"" + (System.getenv("MERCADINHO_LINK_COMPRA")?.takeIf { it.isNotBlank() } ?: "https://play.google.com/store/apps/details?id=br.com.mercadinhofacil") + "\"",
+    )
 
     // Assinatura da versão de loja: preencha as variáveis de ambiente (ver
     // docs/MERCADINHO-PUBLICAR.md). Sem elas, o release sai assinado com a

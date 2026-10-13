@@ -1,6 +1,14 @@
 package br.com.mercadinhofacil.ui
 
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -46,8 +54,27 @@ class Nav(private val nav: NavHostController) {
     fun inicio() = nav.navigate("inicio") { popUpTo(nav.graph.id) { inclusive = true } }
 }
 
+/** Janela que aparece quando a versão de teste chega ao limite de algum cadastro. */
+@Composable
+private fun JanelaLimiteTeste() {
+    val app = LocalApp.current
+    val context = LocalContext.current
+    val mensagem by app.limiteAtingido.collectAsState()
+    val texto = mensagem ?: return
+    AlertDialog(
+        onDismissRequest = { app.limiteAtingido.value = null },
+        title = { Text("Limite da versão de teste") },
+        text = { Text(texto, fontSize = 18.sp) },
+        confirmButton = {
+            Button(onClick = { app.limiteAtingido.value = null; abrirCompra(context) }) { Text("Comprar a versão completa", fontSize = 17.sp) }
+        },
+        dismissButton = { TextButton(onClick = { app.limiteAtingido.value = null }) { Text("Agora não", fontSize = 17.sp) } },
+    )
+}
+
 @Composable
 fun Navegacao(inicioNoTutorial: Boolean) {
+    JanelaLimiteTeste()
     val controlador = rememberNavController()
     val nav = Nav(controlador)
     val id = listOf(navArgument("id") { type = NavType.LongType })

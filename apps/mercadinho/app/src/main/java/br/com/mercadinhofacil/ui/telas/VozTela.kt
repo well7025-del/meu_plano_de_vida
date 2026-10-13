@@ -218,7 +218,8 @@ fun TelaVoz(nav: Nav) {
                                 pensando = true
                                 escopo.launch {
                                     val r = try { p.executar(forma) } catch (e: Exception) {
-                                        br.com.mercadinhofacil.voz.Execucao("Não deu certo: ${e.message}")
+                                        if (e is br.com.mercadinhofacil.dados.LimiteDoTeste) app.limiteAtingido.value = e.message
+                                        br.com.mercadinhofacil.voz.Execucao(if (e is br.com.mercadinhofacil.dados.LimiteDoTeste) e.message.orEmpty() else "Não deu certo: ${e.message}")
                                     }
                                     conversa += Fala(false, r.resposta, r.abrir, if (r.abrir?.startsWith("comprovante") == true) "Ver comprovante" else "Abrir")
                                     responder(r.resposta)

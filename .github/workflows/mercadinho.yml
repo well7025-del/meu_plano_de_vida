@@ -1,6 +1,10 @@
-# Compila o app Mercadinho Fácil e publica o APK como artefato do workflow.
+# Compila o app Mercadinho Fácil e publica os APKs como artefatos do workflow.
 # Para baixar: aba Actions > "Mercadinho Fácil - APK" > execução mais recente >
-# seção Artifacts > mercadinho-apk.
+# seção Artifacts:
+#   mercadinho-teste     -> versão de teste (cadastros limitados) para divulgar
+#   mercadinho-completo  -> versão completa (APK e .aab para a Play Store)
+# O link do botão "Comprar a versão completa" vem da variável do repositório
+# MERCADINHO_LINK_COMPRA (Settings > Secrets and variables > Actions > Variables).
 name: Mercadinho Fácil - APK
 
 on:
@@ -39,6 +43,7 @@ jobs:
           MERCADINHO_KEYSTORE_SENHA: ${{ secrets.MERCADINHO_KEYSTORE_SENHA }}
           MERCADINHO_CHAVE_ALIAS: ${{ secrets.MERCADINHO_CHAVE_ALIAS }}
           MERCADINHO_CHAVE_SENHA: ${{ secrets.MERCADINHO_CHAVE_SENHA }}
+          MERCADINHO_LINK_COMPRA: ${{ vars.MERCADINHO_LINK_COMPRA }}
         run: |
           # Com a chave de assinatura cadastrada nos segredos, o release sai
           # pronto para a Play Store; sem ela, sai assinado com a chave de teste.
@@ -50,18 +55,34 @@ jobs:
 
       - name: Conferir que o app não usa internet
         run: |
-          manifesto=$(find app/build/intermediates -path '*release*' -name AndroidManifest.xml | grep -i merged | head -1)
-          echo "Permissões do APK final ($manifesto):"
-          grep -o 'uses-permission[^>]*android:name="[^"]*"' "$manifesto" | sed 's/.*name=//'
-          if grep -q 'android.permission.INTERNET' "$manifesto"; then
-            echo "::error::Alguma biblioteca acrescentou a permissão de internet"; exit 1
-          fi
+          manifestos=$(find app/build/intermediates -ipath '*release*' -name AndroidManifest.xml | grep -i merged_manifest)
+          [ -n "$manifestos" ] || { echo "::error::Manifesto final não encontrado"; exit 1; }
+          for manifesto in $manifestos; do
+            echo "Permissões de $manifesto:"
+            grep -o 'uses-permission[^>]*android:name="[^"]*"' "$manifesto" | sed 's/.*name=//'
+            if grep -q 'android.permission.INTERNET' "$manifesto"; then
+              echo "::error::Alguma biblioteca acrescentou a permissão de internet"; exit 1
+            fi
+          done
+
+      - name: Separar os arquivos com nomes claros
+        run: |
+          mkdir -p ../../saida/teste ../../saida/completo
+          cp app/build/outputs/apk/teste/release/*.apk ../../saida/teste/mercadinho-facil-TESTE.apk
+          cp app/build/outputs/apk/completo/release/*.apk ../../saida/completo/mercadinho-facil-completo.apk
+          cp app/build/outputs/apk/completo/debug/*.apk ../../saida/completo/mercadinho-facil-completo-debug.apk
+          cp app/build/outputs/bundle/completoRelease/*.aab ../../saida/completo/mercadinho-facil-completo-playstore.aab
+          cp app/build/outputs/bundle/testeRelease/*.aab ../../saida/teste/mercadinho-facil-TESTE-playstore.aab
+          ls -la ../../saida/*
 
       - uses: actions/upload-artifact@v4
         with:
-          name: mercadinho-apk
-          path: |
-            apps/mercadinho/app/build/outputs/apk/debug/*.apk
-            apps/mercadinho/app/build/outputs/apk/release/*.apk
-            apps/mercadinho/app/build/outputs/bundle/release/*.aab
+          name: mercadinho-teste
+          path: saida/teste/
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mercadinho-completo
+          path: saida/completo/
           if-no-files-found: error
