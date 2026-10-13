@@ -85,7 +85,7 @@ artefato separado:
   exemplo o link da Play Store, da Hotmart/Kiwify ou `https://wa.me/55DDDNUMERO`).
   Sem a variável, o botão abre a página da versão completa na Play Store.
 - Os limites ficam em `apps/mercadinho/app/build.gradle.kts`, no bloco
-  `create("teste")` (`LIMITE_PRODUTOS`, `LIMITE_CLIENTES`, `LIMITE_VENDAS`).
+  `create("demo")` (`LIMITE_PRODUTOS`, `LIMITE_CLIENTES`, `LIMITE_VENDAS`).
 
 **Como distribuir o teste**
 

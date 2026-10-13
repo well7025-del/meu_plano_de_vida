@@ -22,7 +22,7 @@ android {
 
     // Duas versões do mesmo código:
     //  - completo: a que o cliente compra, sem limites.
-    //  - teste: instala ao lado da completa (outro applicationId), com
+    //  - demo (versão de teste): instala ao lado da completa (outro applicationId), com
     //    cadastros limitados, para o cliente experimentar antes de pagar.
     flavorDimensions += "versao"
     productFlavors {
@@ -34,7 +34,7 @@ android {
             buildConfigField("int", "LIMITE_CLIENTES", "0")
             buildConfigField("int", "LIMITE_VENDAS", "0")
         }
-        create("teste") {
+        create("demo") {
             dimension = "versao"
             applicationIdSuffix = ".teste"
             versionNameSuffix = "-teste"

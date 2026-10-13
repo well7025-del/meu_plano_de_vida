@@ -72,7 +72,7 @@ Actions. Na execução, em *Artifacts*, há dois pacotes:
   (15 produtos, 5 clientes e 50 vendas; todas as funções liberadas).
 - `mercadinho-completo`: versão completa (APK e `.aab` para a Play Store).
 
-As duas saem do mesmo código (*product flavors* `teste` e `completo`) e podem
+As duas saem do mesmo código (*product flavors* `demo` e `completo`) e podem
 ficar instaladas juntas no mesmo celular.
 
 Para vender, veja [`docs/MERCADINHO-VENDER.md`](../../docs/MERCADINHO-VENDER.md).

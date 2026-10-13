@@ -68,11 +68,11 @@ jobs:
       - name: Separar os arquivos com nomes claros
         run: |
           mkdir -p ../../saida/teste ../../saida/completo
-          cp app/build/outputs/apk/teste/release/*.apk ../../saida/teste/mercadinho-facil-TESTE.apk
+          cp app/build/outputs/apk/demo/release/*.apk ../../saida/teste/mercadinho-facil-TESTE.apk
           cp app/build/outputs/apk/completo/release/*.apk ../../saida/completo/mercadinho-facil-completo.apk
           cp app/build/outputs/apk/completo/debug/*.apk ../../saida/completo/mercadinho-facil-completo-debug.apk
           cp app/build/outputs/bundle/completoRelease/*.aab ../../saida/completo/mercadinho-facil-completo-playstore.aab
-          cp app/build/outputs/bundle/testeRelease/*.aab ../../saida/teste/mercadinho-facil-TESTE-playstore.aab
+          cp app/build/outputs/bundle/demoRelease/*.aab ../../saida/teste/mercadinho-facil-TESTE-playstore.aab
           ls -la ../../saida/*
 
       - uses: actions/upload-artifact@v4
